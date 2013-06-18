@@ -1,0 +1,7 @@
+*.dep
+*.o
+*~
+run/
+platforms/
+lnInclude/
+linux64GccDPOpt/
