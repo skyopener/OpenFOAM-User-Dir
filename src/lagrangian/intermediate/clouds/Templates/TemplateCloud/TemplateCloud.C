@@ -23,13 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "WetCloud.H"
+#include "TemplateCloud.H"
 #include "CollisionModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::WetCloud<CloudType>::WetCloud
+Foam::TemplateCloud<CloudType>::TemplateCloud
 (
     const word& cloudName,
     const volScalarField& rho,
@@ -45,7 +45,7 @@ Foam::WetCloud<CloudType>::WetCloud
     {
         FatalErrorIn
         (
-            "Foam::WetCloud<CloudType>::WetCloud"
+            "Foam::TemplateCloud<CloudType>::TemplateCloud"
             "("
                 "const word&, "
                 "const volScalarField&, "
@@ -70,9 +70,9 @@ Foam::WetCloud<CloudType>::WetCloud
 
 
 template<class CloudType>
-Foam::WetCloud<CloudType>::WetCloud
+Foam::TemplateCloud<CloudType>::TemplateCloud
 (
-    WetCloud<CloudType>& c,
+    TemplateCloud<CloudType>& c,
     const word& name
 )
 :
@@ -81,11 +81,11 @@ Foam::WetCloud<CloudType>::WetCloud
 
 
 template<class CloudType>
-Foam::WetCloud<CloudType>::WetCloud
+Foam::TemplateCloud<CloudType>::TemplateCloud
 (
     const fvMesh& mesh,
     const word& name,
-    const WetCloud<CloudType>& c
+    const TemplateCloud<CloudType>& c
 )
 :
     CloudType(mesh, name, c)
@@ -95,5 +95,5 @@ Foam::WetCloud<CloudType>::WetCloud
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::WetCloud<CloudType>::~WetCloud()
+Foam::TemplateCloud<CloudType>::~TemplateCloud()
 {}

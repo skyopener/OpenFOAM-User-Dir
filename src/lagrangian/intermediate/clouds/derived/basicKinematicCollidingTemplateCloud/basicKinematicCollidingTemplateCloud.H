@@ -21,32 +21,44 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    Foam::basicKinematicCollidingTemplateCloud
+
+Description
+    Cloud class to introduce kinematic colliding parcels
+
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#ifndef basicKinematicCollidingTemplateCloud_H
+#define basicKinematicCollidingTemplateCloud_H
 
-template<class CloudType>
-inline const Foam::WetCloud<CloudType>&
-Foam::WetCloud<CloudType>::cloudCopy() const
+#include "Cloud.H"
+#include "KinematicCloud.H"
+#include "CollidingCloud.H"
+#include "TemplateCloud.H"
+#include "basicKinematicCollidingParcel.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return cloudCopyPtr_();
+    typedef TemplateCloud
+    <
+        CollidingCloud
+        <
+            KinematicCloud
+            <
+                Cloud
+                <
+                    basicKinematicCollidingParcel
+                >
+            >
+        >
+    > basicKinematicCollidingTemplateCloud;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class CloudType>
-inline const Foam::CollisionModel<Foam::WetCloud<CloudType> >&
-Foam::WetCloud<CloudType>::collision() const
-{
-    return collisionModel_();
-}
-
-
-template<class CloudType>
-inline Foam::CollisionModel<Foam::WetCloud<CloudType> >&
-Foam::WetCloud<CloudType>::collision()
-{
-    return collisionModel_();
-}
-
+#endif
 
 // ************************************************************************* //
