@@ -6,4 +6,8 @@ CLOUDS=clouds
 BASECLOUDS=$(CLOUDS)/baseClasses
 DERIVEDCLOUDS=$(CLOUDS)/derived
 
+TEMPLATEKINEMATICCOLLIDINGPARCEL=$(DERIVEDPARCELS)/templateKinematicCollidingParcel
+$(TEMPLATEKINEMATICCOLLIDINGPARCEL)/defineTemplateKinematicCollidingParcel.C
+$(TEMPLATEKINEMATICCOLLIDINGPARCEL)/makeTemplateKinematicCollidingParcelSubmodels.C
+
 LIB = $(FOAM_USER_LIBBIN)/libuserLagrangianIntermediate

@@ -5,3 +5,4 @@ run/
 platforms/
 lnInclude/
 linux64GccDPOpt/
+linux64GccDPDebug/

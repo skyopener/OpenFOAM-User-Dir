@@ -71,7 +71,7 @@
     args.optionReadIfPresent("cloudName", kinematicCloudName);
 
     Info<< "Constructing kinematicCloud " << kinematicCloudName << endl;
-    basicKinematicCollidingTemplateCloud kinematicCloud
+    templateKinematicCollidingCloud kinematicCloud
     (
         kinematicCloudName,
         rhoInf,

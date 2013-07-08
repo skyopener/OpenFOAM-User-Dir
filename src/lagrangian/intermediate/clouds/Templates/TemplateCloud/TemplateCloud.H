@@ -22,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::WetCloud
+    Foam::TemplateCloud
 
 Description
     Adds coolisions to kinematic clouds
 
 SourceFiles
-    WetCloudI.H
-    WetCloud.C
+    TemplateCloudI.H
+    TemplateCloud.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WetCloud_H
-#define WetCloud_H
+#ifndef TemplateCloud_H
+#define TemplateCloud_H
 
 #include "particle.H"
 #include "Cloud.H"
@@ -49,11 +49,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class WetCloud Declaration
+                       Class TemplateCloud Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class WetCloud
+class TemplateCloud
 :
     public CloudType
 {
@@ -68,7 +68,7 @@ public:
         typedef typename CloudType::particleType parcelType;
 
         //- Convenience typedef for this cloud type
-        typedef WetCloud<CloudType> wetCloudType;
+        typedef TemplateCloud<CloudType> templateCloudType;
 
 
 private:
@@ -76,10 +76,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        WetCloud(const WetCloud&);
+        TemplateCloud(const TemplateCloud&);
 
         //- Disallow default bitwise assignment
-        void operator=(const WetCloud&);
+        void operator=(const TemplateCloud&);
 
 
 public:
@@ -87,7 +87,7 @@ public:
     // Constructors
 
         //- Construct given carrier gas fields
-        WetCloud
+        TemplateCloud
         (
             const word& cloudName,
             const volScalarField& rho,
@@ -98,23 +98,23 @@ public:
         );
 
         //- Copy constructor with new name
-        WetCloud
+        TemplateCloud
         (
-            WetCloud<CloudType>& c,
+            TemplateCloud<CloudType>& c,
             const word& name
         );
 
         //- Copy constructor with new name - creates bare cloud
-        WetCloud
+        TemplateCloud
         (
             const fvMesh& mesh,
             const word& name,
-            const WetCloud<CloudType>& c
+            const TemplateCloud<CloudType>& c
         );
 
 
     //- Destructor
-    virtual ~WetCloud();
+    virtual ~TemplateCloud();
 
 };
 
@@ -126,7 +126,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "WetCloud.C"
+#   include "TemplateCloud.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
