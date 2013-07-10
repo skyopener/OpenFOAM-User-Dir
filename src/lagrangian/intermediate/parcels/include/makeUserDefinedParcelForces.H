@@ -23,20 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeUserDefinedParcelCloudFunctionObjects_H
-#define makeUserDefinedParcelCloudFunctionObjects_H
+#ifndef makeUserDefinedParcelForces_H
+#define makeUserDefinedParcelForces_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "VoidFractionNumber.H"
-#include "VoidFractionSubDivision.H"
+#include "ErgunPlusWenYuDragForce.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeUserDefinedParcelCloudFunctionObjects(CloudType)                  \
+#define makeUserDefinedParcelForces(CloudType)                                           \
                                                                               \
-    makeCloudFunctionObjectType(VoidFractionNumber, CloudType);               \
-    makeCloudFunctionObjectType(VoidFractionSubDivision, CloudType);
+    makeParticleForceModelType(ErgunPlusWenYuDragForce, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

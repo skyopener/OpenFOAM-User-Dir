@@ -35,15 +35,15 @@ License
 #include "makeParcelPatchInteractionModels.H"
 #include "makeParcelSurfaceFilmModels.H"
 
+// Include user defined submodels
 #include "makeUserDefinedParcelCloudFunctionObjects.H"
+#include "makeUserDefinedParcelForces.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     makeParcelCloudFunctionObjects(templateKinematicCollidingCloud);
-
-    makeUserDefinedParcelCloudFunctionObjects(templateKinematicCollidingCloud);
 
     // Kinematic sub-models
     makeParcelForces(templateKinematicCollidingCloud);
@@ -52,6 +52,11 @@ namespace Foam
     makeParcelCollisionModels(templateKinematicCollidingCloud);
     makeParcelPatchInteractionModels(templateKinematicCollidingCloud);
     makeParcelSurfaceFilmModels(templateKinematicCollidingCloud);
+
+    // User defined sub-models
+    makeUserDefinedParcelCloudFunctionObjects(templateKinematicCollidingCloud);
+    makeUserDefinedParcelForces(templateKinematicCollidingCloud);
+
 }
 
 
