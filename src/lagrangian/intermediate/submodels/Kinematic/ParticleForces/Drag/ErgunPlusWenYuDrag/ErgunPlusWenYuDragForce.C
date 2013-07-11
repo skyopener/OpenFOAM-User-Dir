@@ -91,14 +91,11 @@ Foam::forceSuSp Foam::ErgunPlusWenYuDragForce<CloudType>::calcCoupled
     const volScalarField& vf = ms.lookupObject<volScalarField>("voidFraction");
     const scalar& vfp = vf.internalField()[p.cell()];
 
-    scalar betaTemp = beta(p,Re,muc,vfp);
-
-    Info << Re*vfp << "\t" << vfp << "\t" << betaTemp << endl;
-
-    // value.Sp() = mass*0.75*muc*CdRe(Re)/(p.rho()*sqr(p.d()));
+    value.Sp() = beta(p,Re,muc,vfp)*mass/(p.rho()*(1-vfp+ROOTVSMALL));
 
     return value;
 }
+
 
 template<class CloudType>
 Foam::scalar Foam::ErgunPlusWenYuDragForce<CloudType>::beta
@@ -109,17 +106,14 @@ Foam::scalar Foam::ErgunPlusWenYuDragForce<CloudType>::beta
     const scalar vfp
 ) const
 {
-    scalar dragCoeff(0);
     if (vfp <= 0.8)
     {
-        dragCoeff = ErgunBeta(p,Re*vfp,muc,vfp);
+        return ErgunBeta(p,Re*vfp,muc,vfp);
     }
     else
     {
-        dragCoeff = WenYuBeta(p,Re*vfp,muc,vfp);
+        return WenYuBeta(p,Re*vfp,muc,vfp);
     }
-
-    return dragCoeff;
 }
 
 
@@ -132,7 +126,7 @@ Foam::scalar Foam::ErgunPlusWenYuDragForce<CloudType>::ErgunBeta
     const scalar vfp
 ) const
 {
-    return muc*(1-vfp)*(150*(1-vfp)+1.75*Rep)/(magSqr(p.d())*vfp);
+    return muc*(1-vfp)*(150*(1-vfp)+1.75*Rep)/(sqr(p.d())*vfp+ROOTVSMALL);
 }
 
 
@@ -145,6 +139,6 @@ Foam::scalar Foam::ErgunPlusWenYuDragForce<CloudType>::WenYuBeta
     const scalar vfp
 ) const
 {
-    return 0.75*Cd(Rep)*muc*(1-vfp)*pow(vfp,-2.7)*Rep/magSqr(p.d());
+    return 0.75*Cd(Rep)*muc*(1-vfp)*(pow(vfp,-2.7)+ROOTVSMALL)*Rep/sqr(p.d());
 }
 // ************************************************************************* //
