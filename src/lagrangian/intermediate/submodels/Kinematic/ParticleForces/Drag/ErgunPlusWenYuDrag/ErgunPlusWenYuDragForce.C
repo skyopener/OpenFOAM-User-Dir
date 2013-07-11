@@ -37,7 +37,7 @@ Foam::scalar Foam::ErgunPlusWenYuDragForce<CloudType>::Cd(const scalar Re) const
     }
     else
     {
-        return 24.0*(1.0 + 1.0/6.0*pow(Re, 2.0/3.0))/Re;
+        return 24.0*(1.0 + 1.0/6.0*pow(Re, 2.0/3.0))/(Re+ROOTVSMALL);
     }
 }
 
