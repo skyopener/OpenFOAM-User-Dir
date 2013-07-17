@@ -88,7 +88,8 @@ Foam::forceSuSp Foam::ErgunPlusWenYuDragForce<CloudType>::calcCoupled
     forceSuSp value(vector::zero, 0.0);
 
     const fvMesh& ms = this->mesh();
-    const volScalarField& vf = ms.lookupObject<volScalarField>("voidFraction");
+    const volScalarField& vf =
+        ms.lookupObject<volScalarField>(this->owner().name() + "Theta");
     const scalar& vfp = vf.internalField()[p.cell()];
 
     value.Sp() = beta(p,Re,muc,vfp)*mass/(p.rho()*(1-vfp+ROOTVSMALL));

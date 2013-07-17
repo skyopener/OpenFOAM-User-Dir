@@ -22,20 +22,25 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::VoidFractionNumber
+    Foam::MesoScaleCouplingCloud
 
 Description
-    Creates particle void fraction field on carrier phase
+    Adds coolisions to kinematic clouds
 
 SourceFiles
-    VoidFractionNumber.C
+    MesoScaleCouplingCloudI.H
+    MesoScaleCouplingCloud.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef VoidFractionNumber_H
-#define VoidFractionNumber_H
+#ifndef MesoScaleCouplingCloud_H
+#define MesoScaleCouplingCloud_H
 
-#include "CloudFunctionObject.H"
+#include "particle.H"
+#include "Cloud.H"
+#include "IOdictionary.H"
+#include "autoPtr.H"
+#include "fvMesh.H"
 #include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,79 +49,73 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class VoidFractionNumber Declaration
+                       Class MesoScaleCouplingCloud Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class VoidFractionNumber
+class MesoScaleCouplingCloud
 :
-    public CloudFunctionObject<CloudType>
+    public CloudType
 {
-    // Private Data
+public:
 
-        // Typedefs
+    // Public typedefs
 
-            //- Convenience typedef for parcel type
-            typedef typename CloudType::parcelType parcelType;
+        //- Type of cloud this cloud was instantiated for
+        typedef CloudType cloudType;
+
+        //- Type of parcel the cloud was instantiated for
+        typedef typename CloudType::particleType parcelType;
+
+        //- Convenience typedef for this cloud type
+        typedef MesoScaleCouplingCloud<CloudType> mesoScaleCouplingCloudType;
 
 
-        //- Void fraction field
-        autoPtr<volScalarField> thetaPtr_;
+private:
 
-protected:
+    // Private Member Functions
 
-    // Protected Member Functions
+        //- Disallow default bitwise copy construct
+        MesoScaleCouplingCloud(const MesoScaleCouplingCloud&);
 
-        //- Write post-processing info
-        virtual void write();
+        //- Disallow default bitwise assignment
+        void operator=(const MesoScaleCouplingCloud&);
 
 
 public:
 
-    //- Runtime type information
-    TypeName("voidFractionNumber");
-
-
     // Constructors
 
-        //- Construct from dictionary
-        VoidFractionNumber(const dictionary& dict, CloudType& owner);
+        //- Construct given carrier gas fields
+        MesoScaleCouplingCloud
+        (
+            const word& cloudName,
+            const volScalarField& rho,
+            const volVectorField& U,
+            const volScalarField& mu,
+            const dimensionedVector& g,
+            bool readFields = true
+        );
 
-        //- Construct copy
-        VoidFractionNumber(const VoidFractionNumber<CloudType>& vf);
+        //- Copy constructor with new name
+        MesoScaleCouplingCloud
+        (
+            MesoScaleCouplingCloud<CloudType>& c,
+            const word& name
+        );
 
-        //- Construct and return a clone
-        virtual autoPtr<CloudFunctionObject<CloudType> > clone() const
-        {
-            return autoPtr<CloudFunctionObject<CloudType> >
-            (
-                new VoidFractionNumber<CloudType>(*this)
-            );
-        }
+        //- Copy constructor with new name - creates bare cloud
+        MesoScaleCouplingCloud
+        (
+            const fvMesh& mesh,
+            const word& name,
+            const MesoScaleCouplingCloud<CloudType>& c
+        );
 
 
     //- Destructor
-    virtual ~VoidFractionNumber();
+    virtual ~MesoScaleCouplingCloud();
 
-
-    // Member Functions
-
-        // Evaluation
-
-            //- Pre-evolve hook
-            virtual void preEvolve();
-
-            //- Post-evolve hook
-            virtual void postEvolve();
-
-            //- Post-move hook
-            virtual void postMove
-            (
-                const parcelType& p,
-                const label cellI,
-                const scalar dt,
-                bool& keepParticle
-            );
 };
 
 
@@ -127,7 +126,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "VoidFractionNumber.C"
+#   include "MesoScaleCouplingCloud.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -42,19 +42,7 @@ Foam::VoidFractionNumber<CloudType>::VoidFractionNumber
 )
 :
     CloudFunctionObject<CloudType>(owner),
-    thetaPtr_(NULL),
-    voidFraction_
-    (
-        IOobject
-        (
-            "voidFraction",
-            owner.mesh().time().timeName(),
-            owner.mesh(),
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        owner.mesh()
-    )
+    thetaPtr_(NULL)
 {}
 
 
@@ -65,8 +53,7 @@ Foam::VoidFractionNumber<CloudType>::VoidFractionNumber
 )
 :
     CloudFunctionObject<CloudType>(vf),
-    thetaPtr_(NULL),
-    voidFraction_(vf.voidFraction())
+    thetaPtr_(NULL)
 {}
 
 
@@ -99,8 +86,8 @@ void Foam::VoidFractionNumber<CloudType>::preEvolve()
                     this->owner().name() + "Theta",
                     mesh.time().timeName(),
                     mesh,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE
                 ),
                 mesh,
                 dimensionedScalar("zero", dimless, 0.0)
@@ -118,8 +105,6 @@ void Foam::VoidFractionNumber<CloudType>::postEvolve()
     const fvMesh& mesh = this->owner().mesh();
 
     theta.internalField() /= mesh.time().deltaTValue()*mesh.V();
-
-    voidFraction_.internalField() = scalar(1) - theta.internalField();
 
     CloudFunctionObject<CloudType>::postEvolve();
 }
