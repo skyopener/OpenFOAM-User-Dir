@@ -38,6 +38,7 @@ License
 // Include user defined submodels
 #include "makeUserDefinedParcelCloudFunctionObjects.H"
 #include "makeUserDefinedParcelForces.H"
+#include "makeUserDefinedParcelCollisionModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,6 +58,7 @@ namespace Foam
     // User defined sub-models
     makeUserDefinedParcelCloudFunctionObjects(basicMesoScaleCouplingCloud);
     makeUserDefinedParcelForces(basicMesoScaleCouplingCloud);
+    makeUserDefinedParcelCollisionModels(collidingCloudType);
 
 }
 

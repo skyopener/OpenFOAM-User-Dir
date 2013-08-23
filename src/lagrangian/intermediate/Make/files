@@ -10,4 +10,8 @@ TEMPLATEKINEMATICCOLLIDINGPARCEL=$(DERIVEDPARCELS)/templateKinematicCollidingPar
 $(TEMPLATEKINEMATICCOLLIDINGPARCEL)/defineTemplateKinematicCollidingParcel.C
 $(TEMPLATEKINEMATICCOLLIDINGPARCEL)/makeTemplateKinematicCollidingParcelSubmodels.C
 
+MESOSCALECOUPLINGPARCEL=$(DERIVEDPARCELS)/basicMesoScaleCouplingParcel
+$(MESOSCALECOUPLINGPARCEL)/defineBasicMesoScaleCouplingParcel.C
+$(MESOSCALECOUPLINGPARCEL)/makeBasicMesoScaleCouplingParcelSubmodels.C
+
 LIB = $(FOAM_USER_LIBBIN)/libuserLagrangianIntermediate

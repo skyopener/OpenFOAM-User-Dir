@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,20 +23,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeUserDefinedParcelForces_H
-#define makeUserDefinedParcelForces_H
+#ifndef makeUserDefinedParcelCollisionModels_H
+#define makeUserDefinedParcelCollisionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "GravityWOBuoyancyForce.H"
-#include "ErgunPlusWenYuDragForce.H"
+#include "StationaryWallLocalSpringSliderDashpot.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeUserDefinedParcelForces(CloudType)                                \
+#define makeUserDefinedParcelCollisionModels(CloudType)                       \
                                                                               \
-    makeParticleForceModelType(GravityWOBuoyancyForce, CloudType);            \
-    makeParticleForceModelType(ErgunPlusWenYuDragForce, CloudType);
+    makeWallModelType(StationaryWallLocalSpringSliderDashpot, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

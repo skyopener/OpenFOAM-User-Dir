@@ -92,6 +92,8 @@ bool Foam::MesoScaleCouplingParcel<ParcelType>::move
                 // Apply correction to position for reduced-D cases
                 meshTools::constrainToMeshCentre(mesh, p.position());
 
+                const point start(p.position());
+
                 // Set the Lagrangian time-step
                 scalar dt = min(dtMax, tEnd);
 
@@ -137,7 +139,14 @@ bool Foam::MesoScaleCouplingParcel<ParcelType>::move
 
                 p.age() += dt;
 
-                td.cloud().functions().postMove(p, cellI, dt, td.keepParticle);
+                td.cloud().functions().postMove
+                (
+                    p,
+                    cellI,
+                    dt,
+                    start,
+                    td.keepParticle
+                );
             }
 
             break;
