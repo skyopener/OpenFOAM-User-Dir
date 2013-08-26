@@ -52,6 +52,8 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
+        volVectorField gradP("gradP",fvc::grad(p));
+
         Info << "Evolving " << kinematicCloud.name() << endl;
         kinematicCloud.evolve();
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,26 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeUserDefinedParcelForces_H
-#define makeUserDefinedParcelForces_H
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "GravityWOBuoyancyForce.H"
-#include "ErgunPlusWenYuDragForce.H"
-#include "ExplicitPressureGradientForce.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#define makeUserDefinedParcelForces(CloudType)                                \
-                                                                              \
-    makeParticleForceModelType(GravityWOBuoyancyForce, CloudType);            \
-    makeParticleForceModelType(ErgunPlusWenYuDragForce, CloudType);           \
-    makeParticleForceModelType(ExplicitPressureGradientForce, CloudType);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //
