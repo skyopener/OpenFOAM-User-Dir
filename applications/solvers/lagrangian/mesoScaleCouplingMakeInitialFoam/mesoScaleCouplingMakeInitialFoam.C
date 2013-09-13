@@ -52,6 +52,8 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
+        volVectorField gradP("gradP",fvc::grad(p));
+
         Info << "Evolving " << kinematicCloud.name() << endl;
         kinematicCloud.evolve();
 
@@ -63,6 +65,11 @@ int main(int argc, char *argv[])
             )
             .internalField();
 
+        voidFraction.correctBoundaryConditions();
+
+        surfaceScalarField voidFractionf(linearInterpolate(voidFraction));
+
+        voidFraction = fvc::average(voidFractionf);
         voidFraction.correctBoundaryConditions();
 
         #include "readPISOControls.H"
@@ -96,7 +103,6 @@ int main(int argc, char *argv[])
 
             // adjustPhi(phiHbyA, U, p);
 
-            surfaceScalarField voidFractionf(linearInterpolate(voidFraction));
 
             for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
             {

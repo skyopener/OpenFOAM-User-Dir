@@ -57,7 +57,6 @@ int main(int argc, char *argv[])
         Info << "Evolving " << kinematicCloud.name() << endl;
         kinematicCloud.evolve();
 
-
         voidFraction.internalField() = scalar(1)
             - mesh.lookupObject<volScalarField>
             (
@@ -65,6 +64,11 @@ int main(int argc, char *argv[])
             )
             .internalField();
 
+        voidFraction.correctBoundaryConditions();
+
+        surfaceScalarField voidFractionf(linearInterpolate(voidFraction));
+
+        voidFraction = fvc::average(voidFractionf);
         voidFraction.correctBoundaryConditions();
 
         #include "readPISOControls.H"
@@ -98,8 +102,6 @@ int main(int argc, char *argv[])
 
             // adjustPhi(phiHbyA, U, p);
 
-            surfaceScalarField voidFractionf(linearInterpolate(voidFraction));
-
             for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
             {
                 fvScalarMatrix pEqn
@@ -116,7 +118,7 @@ int main(int argc, char *argv[])
                 }
             }
 
-            // #include "continuityErrs.H"
+            #include "continuityErrs.H"
 
             U = HbyA - rAU*fvc::grad(p);
             U.correctBoundaryConditions();

@@ -30,13 +30,15 @@ License
 
 #include "VoidFractionNumber.H"
 #include "VoidFractionSubDivision.H"
+#include "VoidFractionDivided.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #define makeUserDefinedParcelCloudFunctionObjects(CloudType)                  \
                                                                               \
     makeCloudFunctionObjectType(VoidFractionNumber, CloudType);               \
-    makeCloudFunctionObjectType(VoidFractionSubDivision, CloudType);
+    makeCloudFunctionObjectType(VoidFractionSubDivision, CloudType);          \
+    makeCloudFunctionObjectType(VoidFractionDivided, CloudType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
