@@ -67,10 +67,10 @@ int main(int argc, char *argv[])
         voidFraction.correctBoundaryConditions();
 
         surfaceScalarField voidFractionf(linearInterpolate(voidFraction));
-
+/*
         voidFraction = fvc::average(voidFractionf);
         voidFraction.correctBoundaryConditions();
-
+*/
         #include "readPISOControls.H"
         #include "CourantNo.H"
 
