@@ -21,44 +21,60 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::basicKinematicCollidingWetCloud
-
-Description
-    Cloud class to introduce kinematic colliding parcels
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef basicKinematicCollidingWetCloud_H
-#define basicKinematicCollidingWetCloud_H
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-#include "Cloud.H"
-#include "KinematicCloud.H"
-#include "CollidingCloud.H"
-#include "WetCloud.H"
-#include "basicKinematicCollidingParcel.H"
+template<class ParcelType>
+inline Foam::WetParcel<ParcelType>::WetParcel
+(
+    const polyMesh& owner,
+    const vector& position,
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI
+)
+:
+    ParcelType(owner, position, cellI, tetFaceI, tetPtI)
+{}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    typedef WetCloud
-    <
-        CollidingCloud
-        <
-            KinematicCloud
-            <
-                Cloud
-                <
-                    basicKinematicCollidingParcel
-                >
-            >
-        >
-    > basicKinematicCollidingWetCloud;
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
+template<class ParcelType>
+inline Foam::WetParcel<ParcelType>::WetParcel
+(
+    const polyMesh& owner,
+    const vector& position,
+    const label cellI,
+    const label tetFaceI,
+    const label tetPtI,
+    const label typeId,
+    const scalar nParticle0,
+    const scalar d0,
+    const scalar dTarget0,
+    const vector& U0,
+    const vector& f0,
+    const vector& angularMomentum0,
+    const vector& torque0,
+    const typename ParcelType::constantProperties& constProps
+)
+:
+    ParcelType
+    (
+        owner,
+        position,
+        cellI,
+        tetFaceI,
+        tetPtI,
+        typeId,
+        nParticle0,
+        d0,
+        dTarget0,
+        U0,
+        f0,
+        angularMomentum0,
+        torque0,
+        constProps
+    )
+{}
 
 // ************************************************************************* //

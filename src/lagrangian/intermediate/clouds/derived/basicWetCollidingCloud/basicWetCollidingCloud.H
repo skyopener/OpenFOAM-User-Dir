@@ -22,27 +22,27 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::basicKinematicCollidingTemplateCloud
+    Foam::basicWetCollidingCloud
 
 Description
     Cloud class to introduce kinematic colliding parcels
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef basicKinematicCollidingTemplateCloud_H
-#define basicKinematicCollidingTemplateCloud_H
+#ifndef basicWetCollidingCloud_H
+#define basicWetCollidingCloud_H
 
 #include "Cloud.H"
 #include "KinematicCloud.H"
 #include "CollidingCloud.H"
-#include "TemplateCloud.H"
-#include "basicKinematicCollidingParcel.H"
+#include "WetCloud.H"
+#include "basicWetCollidingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef TemplateCloud
+    typedef WetCloud
     <
         CollidingCloud
         <
@@ -50,11 +50,11 @@ namespace Foam
             <
                 Cloud
                 <
-                    basicKinematicCollidingParcel
+                    basicWetCollidingParcel
                 >
             >
         >
-    > basicKinematicCollidingTemplateCloud;
+    > basicWetCollidingCloud;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
