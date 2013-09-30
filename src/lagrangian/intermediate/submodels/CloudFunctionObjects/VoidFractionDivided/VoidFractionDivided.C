@@ -352,29 +352,4 @@ bool Foam::VoidFractionDivided<CloudType>::isInside(const point& p, label celli)
     return inCell;
 }
 
-
-
-template<class CloudType>
-label Foam::VoidFractionDivided<CloudType>::refinementLevel() const
-{
-    return refinementLevel_;
-}
-
-template<class CloudType>
-label Foam::VoidFractionDivided<CloudType>::satParNo() const
-{
-    return satParNo_;
-}
-
-template<class CloudType>
-List<vector> Foam::VoidFractionDivided<CloudType>::satPositions() const
-{
-    return satPositions_;
-}
-
-template<class CloudType>
-scalar Foam::VoidFractionDivided<CloudType>::maxDistance() const
-{
-    return maxDistance_;
-}
 // ************************************************************************* //

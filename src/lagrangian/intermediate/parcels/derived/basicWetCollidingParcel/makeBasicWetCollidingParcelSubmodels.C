@@ -50,15 +50,15 @@ namespace Foam
     makeParcelForces(basicWetCollidingCloud);
     makeParcelDispersionModels(basicWetCollidingCloud);
     makeParcelInjectionModels(basicWetCollidingCloud);
-    typedef basicWetCollidingCloud::collidingCloudType collidingCloudType;
-    makeParcelCollisionModels(collidingCloudType);
+    typedef basicWetCollidingCloud::collidingCloudType wetCollidingType;
+    makeParcelCollisionModels(wetCollidingType);
     makeParcelPatchInteractionModels(basicWetCollidingCloud);
     makeParcelSurfaceFilmModels(basicWetCollidingCloud);
 
     // User defined sub-models
     makeUserDefinedParcelCloudFunctionObjects(basicWetCollidingCloud);
     makeUserDefinedParcelForces(basicWetCollidingCloud);
-    makeUserDefinedParcelCollisionModels(collidingCloudType);
+    makeUserDefinedParcelCollisionModels(wetCollidingType);
 
 }
 

@@ -23,44 +23,33 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicMesoScaleCouplingCloud.H"
-
-#include "makeParcelCloudFunctionObjects.H"
-
-// Kinematic
-#include "makeParcelForces.H"
-#include "makeParcelDispersionModels.H"
-#include "makeParcelInjectionModels.H"
-#include "makeParcelCollisionModels.H"
-#include "makeParcelPatchInteractionModels.H"
-#include "makeParcelSurfaceFilmModels.H"
-
-// Include user defined submodels
-#include "makeUserDefinedParcelCloudFunctionObjects.H"
-#include "makeUserDefinedParcelForces.H"
-#include "makeUserDefinedParcelCollisionModels.H"
+#include "VoidFractionDivided.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+
+template<class CloudType>
+label Foam::VoidFractionDivided<CloudType>::refinementLevel() const
 {
-    makeParcelCloudFunctionObjects(basicMesoScaleCouplingCloud);
-
-    // Kinematic sub-models
-    makeParcelForces(basicMesoScaleCouplingCloud);
-    makeParcelDispersionModels(basicMesoScaleCouplingCloud);
-    makeParcelInjectionModels(basicMesoScaleCouplingCloud);
-    typedef basicMesoScaleCouplingCloud::collidingCloudType mesoScaleCoupledCollidingType;
-    makeParcelCollisionModels(mesoScaleCoupledCollidingType);
-    makeParcelPatchInteractionModels(basicMesoScaleCouplingCloud);
-    makeParcelSurfaceFilmModels(basicMesoScaleCouplingCloud);
-
-    // User defined sub-models
-    makeUserDefinedParcelCloudFunctionObjects(basicMesoScaleCouplingCloud);
-    makeUserDefinedParcelForces(basicMesoScaleCouplingCloud);
-    makeUserDefinedParcelCollisionModels(mesoScaleCoupledCollidingType);
-
+    return refinementLevel_;
 }
 
+template<class CloudType>
+label Foam::VoidFractionDivided<CloudType>::satParNo() const
+{
+    return satParNo_;
+}
+
+template<class CloudType>
+List<vector> Foam::VoidFractionDivided<CloudType>::satPositions() const
+{
+    return satPositions_;
+}
+
+template<class CloudType>
+scalar Foam::VoidFractionDivided<CloudType>::maxDistance() const
+{
+    return maxDistance_;
+}
 
 // ************************************************************************* //
