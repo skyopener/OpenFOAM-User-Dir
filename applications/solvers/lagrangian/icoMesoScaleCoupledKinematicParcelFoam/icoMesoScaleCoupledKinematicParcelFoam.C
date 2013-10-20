@@ -21,30 +21,69 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    icoFoam
+
+Description
+    Transient solver for incompressible, laminar flow of Newtonian fluids.
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeUserDefinedParcelCloudFunctionObjects_H
-#define makeUserDefinedParcelCloudFunctionObjects_H
+#include "fvCFD.H"
+#include "basicMesoScaleCouplingCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "VoidFractionNumber.H"
-#include "VoidFractionSubDivision.H"
-#include "VoidFractionDivided.H"
-#include "CellAverageParticleVelocity.H"
+int main(int argc, char *argv[])
+{
+    #include "setRootCase.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    #include "createTime.H"
+    #include "createMesh.H"
 
-#define makeUserDefinedParcelCloudFunctionObjects(CloudType)                  \
-                                                                              \
-    makeCloudFunctionObjectType(VoidFractionNumber, CloudType);               \
-    makeCloudFunctionObjectType(VoidFractionSubDivision, CloudType);          \
-    makeCloudFunctionObjectType(VoidFractionDivided, CloudType);              \
-    makeCloudFunctionObjectType(CellAverageParticleVelocity, CloudType);
+    #include "readGravitationalAcceleration.H"
 
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#endif
+    Info<< "\nStarting time loop\n" << endl;
+
+    while (runTime.loop())
+    {
+        Info<< "Time = " << runTime.timeName() << nl << endl;
+
+        volVectorField gradP("gradP",fvc::grad(p));
+
+        Info << "Evolving " << kinematicCloud.name() << endl;
+        kinematicCloud.evolve();
+
+        #include "mapParticleInfoToMesh.H"
+
+        #include "readPISOControls.H"
+        #include "CourantNo.H"
+
+        #include "U1Eqn.H"
+
+        // --- PISO loop
+
+        for (int corr=0; corr<nCorr; corr++)
+        {
+            #include "pEqn.H"
+        }
+
+        runTime.write();
+
+        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+            << nl << endl;
+    }
+
+    Info<< "End\n" << endl;
+
+    return 0;
+}
+
 
 // ************************************************************************* //

@@ -69,7 +69,7 @@ Foam::VoidFractionDivided<CloudType>::VoidFractionDivided
     scalar pi = Foam::constant::mathematical::pi;
 
     scalar r = scalar(0);
-    scalar delR = scalar(1) / refinementLevel_;
+    scalar delR = scalar(0.9) / refinementLevel_;
     scalar theta = 0.25 * pi;
     scalar delTheta = 0.5 * pi;
 
@@ -246,9 +246,9 @@ void Foam::VoidFractionDivided<CloudType>::postMove
         }
     }
 
-
-    labelHashSet lhash;
 /*
+    labelHashSet lhash;
+
     recursiveCellSearchForSatelliteParticle
     (
         p,
@@ -262,26 +262,14 @@ void Foam::VoidFractionDivided<CloudType>::postMove
 template<class CloudType>
 void Foam::VoidFractionDivided<CloudType>::buildInteractionList()
 {
-    const fvMesh& mesh = this->owner().mesh();
+    Info << "Building InteractionLists with interaction distance "
+         << maxDistance_ << endl;
 
-    procBb_ = treeBoundBox(mesh.points());
+    const fvMesh& mesh = this->owner().mesh();
 
     const vector interactionVec = maxDistance_*vector::one;
 
-    extendedProcBb_ = treeBoundBox
-    (
-        procBb_.min() - interactionVec,
-        procBb_.max() + interactionVec
-    );
-
-    allExtendedProcBbs_.setSize(Pstream::nProcs());
-
-    allExtendedProcBbs_[Pstream::myProcNo()] = extendedProcBb_;
-
-    Pstream::gatherList(allExtendedProcBbs_);
-
-    Pstream::scatterList(allExtendedProcBbs_);
-
+    // Create cell-based and extended cell-based bound boxes
     cellBbs_.setSize(mesh.nCells());
 
     forAll(cellBbs_, cellI)
@@ -307,6 +295,8 @@ void Foam::VoidFractionDivided<CloudType>::buildInteractionList()
         );
     }
 
+    // Interaction list: neighbouring cells
+    // where extended cell-based bound boxes are within maxDistance_
     allInteractionList_.setSize(mesh.nCells());
 
     DynamicList<label> tmpInteractionList;
@@ -323,6 +313,81 @@ void Foam::VoidFractionDivided<CloudType>::buildInteractionList()
             }
         }
         allInteractionList_[cellI] = tmpInteractionList.xfer();
+    }
+
+    // Create processor domain-based and extended domain-based bound boxes
+    procBb_ = treeBoundBox(mesh.points());
+
+    extendedProcBb_ = treeBoundBox
+    (
+        procBb_.min() - interactionVec,
+        procBb_.max() + interactionVec
+    );
+
+    // Collects extendedProcBbs_ of all processors
+    allExtendedProcBbs_.setSize(Pstream::nProcs());
+
+    allExtendedProcBbs_[Pstream::myProcNo()] = extendedProcBb_;
+
+    Pstream::gatherList(allExtendedProcBbs_);
+    Pstream::scatterList(allExtendedProcBbs_);
+
+    neighbouringProcs_.clear();
+
+    DynamicList<label> tmpNeighbouringProcs;
+
+    forAll(allExtendedProcBbs_, procI)
+    {
+        if(Pstream::myProcNo() != procI)
+        {
+            if(procBb_.overlaps(allExtendedProcBbs_[procI]))
+            {
+                tmpNeighbouringProcs.append(procI);
+            }
+        }
+    }
+
+    neighbouringProcs_ = tmpNeighbouringProcs.xfer();
+
+    Pout << "neighbouringProcs_" << neighbouringProcs_ << endl;
+
+    // Collects the extended cell-based bound boxes of all processors
+    List<List<treeBoundBox> > allExtendedCellBbs(Pstream::nProcs());
+
+    allExtendedCellBbs[Pstream::myProcNo()] = extendedCellBbs_;
+
+    Pstream::gatherList(allExtendedCellBbs);
+    Pstream::scatterList(allExtendedCellBbs);
+
+    interactionCellLabelList_.setSize(mesh.nCells());
+    interactionCellProcList_.setSize(mesh.nCells());
+
+    forAll(cellBbs_, cellI)
+    {
+        DynamicList<label> tmpCellLabelList;
+        DynamicList<label> tmpCellProcList;
+
+        forAll(allExtendedProcBbs_, otherProcI)
+        {
+            if(Pstream::myProcNo() != otherProcI)
+            {
+                treeBoundBox& thisCellBb = cellBbs_[cellI];
+                if(thisCellBb.overlaps(allExtendedProcBbs_[otherProcI]))
+                {
+                    forAll(allExtendedCellBbs[otherProcI], otherCellI)
+                    {
+                        if(thisCellBb.overlaps(allExtendedCellBbs[otherProcI][otherCellI]))
+                        {
+                            tmpCellLabelList.append(otherCellI);
+                            tmpCellProcList.append(otherProcI);
+                        }
+                    }
+                }
+            }
+        }
+
+        interactionCellLabelList_[cellI] = tmpCellLabelList.xfer();
+        interactionCellProcList_[cellI] = tmpCellProcList.xfer();
     }
 }
 

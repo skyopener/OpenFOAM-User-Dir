@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,27 +21,33 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Global
+    createPhiWithVoidFraction
+
+Description
+    Creates and initialises the relative face-flux field phi.
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeUserDefinedParcelCloudFunctionObjects_H
-#define makeUserDefinedParcelCloudFunctionObjects_H
+#ifndef createPhiWithVoidFraction_H
+#define createPhiWithVoidFraction_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "VoidFractionNumber.H"
-#include "VoidFractionSubDivision.H"
-#include "VoidFractionDivided.H"
-#include "CellAverageParticleVelocity.H"
+Info<< "Reading/calculating face flux field phi\n" << endl;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#define makeUserDefinedParcelCloudFunctionObjects(CloudType)                  \
-                                                                              \
-    makeCloudFunctionObjectType(VoidFractionNumber, CloudType);               \
-    makeCloudFunctionObjectType(VoidFractionSubDivision, CloudType);          \
-    makeCloudFunctionObjectType(VoidFractionDivided, CloudType);              \
-    makeCloudFunctionObjectType(CellAverageParticleVelocity, CloudType);
-
+surfaceScalarField phi
+(
+    IOobject
+    (
+        "phi",
+        runTime.timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE
+    ),
+    linearInterpolate(voidFraction*U) & mesh.Sf()
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
