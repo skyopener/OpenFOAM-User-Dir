@@ -40,6 +40,9 @@ License
 #include "makeUserDefinedParcelForces.H"
 #include "makeUserDefinedParcelCollisionModels.H"
 
+// Wet
+#include "makeParcelWetModels.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -59,6 +62,9 @@ namespace Foam
     makeUserDefinedParcelCloudFunctionObjects(basicWetCollidingCloud);
     makeUserDefinedParcelForces(basicWetCollidingCloud);
     makeUserDefinedParcelCollisionModels(wetCollidingType);
+
+    // Wet sub-models
+    makeParcelWetModels(basicWetCollidingCloud);
 
 }
 
