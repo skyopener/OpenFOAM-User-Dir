@@ -24,7 +24,52 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "WetCloud.H"
-#include "CollisionModel.H"
+#include "WetModel.H"
+
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+
+template<class CloudType>
+void Foam::WetCloud<CloudType>::setModels()
+{
+    wetModel_.reset
+    (
+        WetModel<WetCloud<CloudType> >::New
+        (
+            this->subModelProperties(),
+            *this
+        ).ptr()
+    );
+}
+
+template<class CloudType>
+template<class TrackData>
+void  Foam::WetCloud<CloudType>::moveWet
+(
+    TrackData& td,
+    const scalar deltaT
+)
+{
+
+    td.part() = TrackData::tpVelocityHalfStep;
+    CloudType::move(td,  deltaT);
+
+    td.part() = TrackData::tpLinearTrack;
+    CloudType::move(td,  deltaT);
+
+    // td.part() = TrackData::tpRotationalTrack;
+    // CloudType::move(td);
+
+    this->updateCellOccupancy();
+
+    this->collision().collide();
+
+    // bond() should come after collide() since the force is initialised in collide()
+    this->wetModel().bond();
+
+    td.part() = TrackData::tpVelocityHalfStep;
+    CloudType::move(td,  deltaT);
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -39,7 +84,8 @@ Foam::WetCloud<CloudType>::WetCloud
     bool readFields
 )
 :
-    CloudType(cloudName, rho, U, mu, g, false)
+    CloudType(cloudName, rho, U, mu, g, false),
+    wetModel_(NULL)
 {
     if (this->solution().steadyState())
     {
@@ -54,12 +100,14 @@ Foam::WetCloud<CloudType>::WetCloud
                 "const dimensionedVector&, "
                 "bool"
             ")"
-        )   << "Collision modelling not currently available for steady state "
+        )   << "Wet modelling not currently available for steady state "
             << "calculations" << exit(FatalError);
     }
 
     if (this->solution().active())
     {
+        setModels();
+
         if (readFields)
         {
             parcelType::readFields(*this);
@@ -76,7 +124,8 @@ Foam::WetCloud<CloudType>::WetCloud
     const word& name
 )
 :
-    CloudType(c, name)
+    CloudType(c, name),
+    wetModel_(c.wetModel_->clone())
 {}
 
 
@@ -88,7 +137,8 @@ Foam::WetCloud<CloudType>::WetCloud
     const WetCloud<CloudType>& c
 )
 :
-    CloudType(mesh, name, c)
+    CloudType(mesh, name, c),
+    wetModel_(NULL)
 {}
 
 
@@ -97,3 +147,56 @@ Foam::WetCloud<CloudType>::WetCloud
 template<class CloudType>
 Foam::WetCloud<CloudType>::~WetCloud()
 {}
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+void Foam::WetCloud<CloudType>::evolve()
+{
+
+    if (this->solution().canEvolve())
+    {
+        typename parcelType::template
+            TrackingData<WetCloud<CloudType> > td(*this);
+
+        this->solve(td);
+    }
+}
+
+template<class CloudType>
+template<class TrackData>
+void  Foam::WetCloud<CloudType>::motion(TrackData& td)
+{
+
+    // Sympletic leapfrog integration of particle forces:
+    // + apply half deltaV with stored force
+    // + move positions with new velocity
+    // + calculate forces in new position
+    // + apply half deltaV with new force
+
+    label nSubCycles = this->collision().nSubCycles();
+
+    if (nSubCycles > 1)
+    {
+        Info<< "    " << nSubCycles << " move-wet subCycles" << endl;
+
+        subCycleTime moveWetSubCycle
+        (
+            const_cast<Time&>(this->db().time()),
+            nSubCycles
+        );
+
+        while(!(++moveWetSubCycle).end())
+        {
+            moveWet(td, this->db().time().deltaTValue());
+        }
+
+        moveWetSubCycle.endSubCycle();
+    }
+    else
+    {
+        moveWet(td, this->db().time().deltaTValue());
+    }
+
+}
+

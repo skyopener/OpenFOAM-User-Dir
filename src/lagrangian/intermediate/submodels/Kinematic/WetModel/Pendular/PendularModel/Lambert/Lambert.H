@@ -22,75 +22,63 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::NoWet
+    Foam::Lambert
 
 Description
-    Place holder for 'none' option
-
-SourceFiles
-    NoWet.C
+    Pair forces between particles colliding with a spring, slider, damper model
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoWet_H
-#define NoWet_H
+#ifndef Lambert_H
+#define Lambert_H
 
-#include "WetModel.H"
+#include "PendularModel.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 /*---------------------------------------------------------------------------*\
-                        Class NoWet Declaration
+                    Class Lambert Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class NoWet
+class Lambert
 :
-    public WetModel<CloudType>
+    public PendularModel<CloudType>
 {
+
+    // Private data
+
+        //- Surface tension coefficient
+        scalar surfaceTension_;
+
+        //- Contact angle
+        scalar contactAngle_;
 
 public:
 
     //- Runtime type information
-    TypeName("none");
+    TypeName("Lambert");
 
 
     // Constructors
 
-        //- Construct from components
-        NoWet(const dictionary& dict, CloudType& owner);
-
-        //- Construct copy
-        NoWet(NoWet<CloudType>& cm);
-
-        //- Construct and return a clone
-        virtual autoPtr<WetModel<CloudType> > clone()
-        {
-            return autoPtr<WetModel<CloudType> >
-            (
-                new NoWet<CloudType>(*this)
-            );
-        }
+        //- Construct from dictionary
+        Lambert(const dictionary& dict, CloudType& cloud);
 
 
     //- Destructor
-    virtual ~NoWet();
+    virtual ~Lambert();
 
+        //- Calculate the pair interaction between parcels
+        virtual void evaluatePendular
+        (
+            typename CloudType::parcelType& pA,
+            typename CloudType::parcelType& pB
+        ) const;
 
-    // Member Functions
-
-        //- Flag to indicate whether model activates wet model
-        virtual bool active() const;
-
-        //- Indicates whether model determines wall bonding or not,
-        //  used to determine what value to use for wallImpactDistance
-        virtual bool controlsWallInteraction() const;
-
-        // Bond function
-        virtual void bond();
 };
 
 
@@ -101,7 +89,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "NoWet.C"
+#   include "Lambert.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -23,57 +23,43 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoWet.H"
+#include "PendularModel.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::NoWet<CloudType>::NoWet
+Foam::autoPtr<Foam::PendularModel<CloudType> >
+Foam::PendularModel<CloudType>::New
 (
     const dictionary& dict,
     CloudType& owner
 )
-:
-    WetModel<CloudType>(owner)
-{}
-
-
-template<class CloudType>
-Foam::NoWet<CloudType>::NoWet
-(
-    NoWet<CloudType>& cm
-)
-:
-    WetModel<CloudType>(cm)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::NoWet<CloudType>::~NoWet()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::NoWet<CloudType>::active() const
 {
-    return false;
+    word PendularModelType(dict.lookup("pendularModel"));
+
+    Info<< "Selecting pendular model " << PendularModelType << endl;
+
+    typename dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(PendularModelType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "PendularModel<CloudType>::New"
+            "("
+                "const dictionary&, "
+                "CloudType&"
+            ")"
+        )   << "Unknown pendular model type "
+            << PendularModelType
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid pair model types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+    }
+
+    return autoPtr<PendularModel<CloudType> >(cstrIter()(dict, owner));
 }
-
-
-template<class CloudType>
-bool Foam::NoWet<CloudType>::controlsWallInteraction() const
-{
-    return false;
-}
-
-
-template<class CloudType>
-void Foam::NoWet<CloudType>::bond()
-{}
 
 
 // ************************************************************************* //

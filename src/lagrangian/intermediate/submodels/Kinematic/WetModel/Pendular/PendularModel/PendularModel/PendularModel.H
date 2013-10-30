@@ -22,24 +22,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::WetModel
+    Foam::PendularModel
 
 Description
-    Templated wet model class.
+    Templated pendular interaction class
 
 SourceFiles
-    WetModel.C
-    WetModelNew.C
+    PendularModel.C
+    PendularModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WetModel_H
-#define WetModel_H
+#ifndef PendularModel_H
+#define PendularModel_H
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
-#include "SubModelBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,30 +46,34 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class WetModel Declaration
+                          Class PendularModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class WetModel
-:
-    public SubModelBase<CloudType>
+class PendularModel
 {
-    // Protected data
+    // Private data
 
-        //- Convenience typedef for parcel type
-        typedef typename CloudType::parcelType parcelType;
+        //- The CollisionModel dictionary
+        const dictionary& dict_;
+
+        //- Reference to the owner cloud class
+        CloudType& owner_;
+
+        //- The coefficients dictionary
+        const dictionary coeffDict_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("wetModel");
+    TypeName("pendularModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
     (
         autoPtr,
-        WetModel,
+        PendularModel,
         dictionary,
         (
             const dictionary& dict,
@@ -82,50 +85,45 @@ public:
 
     // Constructors
 
-        //- Construct null from owner
-        WetModel(CloudType& owner);
-
         //- Construct from components
-        WetModel
+        PendularModel
         (
             const dictionary& dict,
             CloudType& owner,
             const word& type
         );
 
-        //- Construct copy
-        WetModel(WetModel<CloudType>& cm);
-
-        //- Construct and return a clone
-        virtual autoPtr<WetModel<CloudType> > clone()
-        {
-            return autoPtr<WetModel<CloudType> >
-            (
-                new WetModel<CloudType>(*this)
-            );
-        }
-
 
     //- Destructor
-    virtual ~WetModel();
+    virtual ~PendularModel();
 
 
     //- Selector
-    static autoPtr<WetModel<CloudType> > New
+    static autoPtr<PendularModel<CloudType> > New
     (
         const dictionary& dict,
         CloudType& owner
     );
 
 
-    // Member Functions
+    // Access
 
-        //- Indicates whether model determines wall bonding or not,
-        //  used to determine what value to use for wallImpactDistance
-        virtual bool controlsWallInteraction() const;
+        //- Return the owner cloud object
+        const CloudType& owner() const;
 
-        // Bonding function
-        virtual void bond();
+        //- Return the dictionary
+        const dictionary& dict() const;
+
+        //- Return the coefficients dictionary
+        const dictionary& coeffDict() const;
+
+        //- Calculate the pendular interaction between parcels
+        virtual void evaluatePendular
+        (
+            typename CloudType::parcelType& pA,
+            typename CloudType::parcelType& pB
+        ) const = 0;
+
 };
 
 
@@ -135,35 +133,29 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeWetModel(CloudType)                                         \
+#define makePendularModel(CloudType)                                          \
                                                                               \
-    typedef CloudType::wetCloudType wetCloudType;                 \
-    defineNamedTemplateTypeNameAndDebug                                       \
-    (                                                                         \
-        WetModel<wetCloudType>,                                   \
-        0                                                                     \
-    );                                                                        \
+    defineNamedTemplateTypeNameAndDebug(PendularModel<CloudType>, 0);         \
+                                                                              \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        WetModel<wetCloudType>,                                   \
+        PendularModel<CloudType>,                                             \
         dictionary                                                            \
     );
 
 
-#define makeWetModelType(SS, CloudType)                                 \
+#define makePendularModelType(SS, CloudType)                                  \
                                                                               \
-    typedef CloudType::wetCloudType wetCloudType;                 \
-    defineNamedTemplateTypeNameAndDebug(SS<wetCloudType>, 0);           \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
                                                                               \
-    WetModel<wetCloudType>::                                      \
-        adddictionaryConstructorToTable<SS<wetCloudType> >              \
-            add##SS##CloudType##wetCloudType##ConstructorToTable_;
+    PendularModel<CloudType>::adddictionaryConstructorToTable<SS<CloudType> > \
+        add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "WetModel.C"
+#   include "PendularModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

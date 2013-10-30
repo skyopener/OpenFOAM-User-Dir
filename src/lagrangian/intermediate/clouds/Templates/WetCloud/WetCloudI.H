@@ -23,57 +23,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoWet.H"
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::NoWet<CloudType>::NoWet
-(
-    const dictionary& dict,
-    CloudType& owner
-)
-:
-    WetModel<CloudType>(owner)
-{}
-
-
-template<class CloudType>
-Foam::NoWet<CloudType>::NoWet
-(
-    NoWet<CloudType>& cm
-)
-:
-    WetModel<CloudType>(cm)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::NoWet<CloudType>::~NoWet()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::NoWet<CloudType>::active() const
+inline const Foam::WetModel<Foam::WetCloud<CloudType> >&
+Foam::WetCloud<CloudType>::wetModel() const
 {
-    return false;
+    return wetModel_();
 }
 
 
 template<class CloudType>
-bool Foam::NoWet<CloudType>::controlsWallInteraction() const
+inline Foam::WetModel<Foam::WetCloud<CloudType> >&
+Foam::WetCloud<CloudType>::wetModel()
 {
-    return false;
+    return wetModel_();
 }
-
-
-template<class CloudType>
-void Foam::NoWet<CloudType>::bond()
-{}
 
 
 // ************************************************************************* //

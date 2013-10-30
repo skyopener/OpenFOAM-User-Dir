@@ -29,14 +29,20 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "NoWet.H"
+#include "Pendular.H"
+
+#include "Lambert.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #define makeParcelWetModels(CloudType)                                        \
                                                                               \
     makeWetModel(CloudType);                                                  \
-    makeWetModelType(NoWet, CloudType);
-
+    makeWetModelType(NoWet, CloudType);                                       \
+    makeWetModelType(Pendular, CloudType);                                    \
+                                                                              \
+    makePendularModel(CloudType);                                             \
+    makePendularModelType(Lambert, CloudType)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

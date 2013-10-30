@@ -23,57 +23,58 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoWet.H"
+#include "PendularModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::NoWet<CloudType>::NoWet
+Foam::PendularModel<CloudType>::PendularModel
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& type
 )
 :
-    WetModel<CloudType>(owner)
-{}
-
-
-template<class CloudType>
-Foam::NoWet<CloudType>::NoWet
-(
-    NoWet<CloudType>& cm
-)
-:
-    WetModel<CloudType>(cm)
+    dict_(dict),
+    owner_(owner),
+    coeffDict_(dict.subDict(type + "Coeffs"))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::NoWet<CloudType>::~NoWet()
+Foam::PendularModel<CloudType>::~PendularModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::NoWet<CloudType>::active() const
+const CloudType&
+Foam::PendularModel<CloudType>::owner() const
 {
-    return false;
+    return owner_;
 }
 
 
 template<class CloudType>
-bool Foam::NoWet<CloudType>::controlsWallInteraction() const
+const Foam::dictionary& Foam::PendularModel<CloudType>::dict() const
 {
-    return false;
+    return dict_;
 }
 
 
 template<class CloudType>
-void Foam::NoWet<CloudType>::bond()
-{}
+const Foam::dictionary&
+Foam::PendularModel<CloudType>::coeffDict() const
+{
+    return coeffDict_;
+}
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "PendularModelNew.C"
 
 // ************************************************************************* //

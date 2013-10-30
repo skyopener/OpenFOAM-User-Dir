@@ -48,6 +48,11 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
+
+template<class CloudType>
+class WetModel;
+
 /*---------------------------------------------------------------------------*\
                        Class WetCloud Declaration
 \*---------------------------------------------------------------------------*/
@@ -81,6 +86,24 @@ private:
         //- Disallow default bitwise assignment
         void operator=(const WetCloud&);
 
+protected:
+    // Protected data
+
+        // References to the cloud sub-models
+
+            //- Wet model
+            autoPtr<WetModel<WetCloud<CloudType> > > wetModel_;
+
+            // Initialisation
+
+                //- Set cloud sub-models
+                void setModels();
+
+            // Cloud evolution functions
+
+                //- Move-wet particles
+                template<class TrackData>
+                void moveWet(TrackData& td, const scalar deltaT);
 
 public:
 
@@ -116,12 +139,40 @@ public:
     //- Destructor
     virtual ~WetCloud();
 
+    // Member Functions
+
+        // Access
+
+            // Sub-models
+
+                //- Return const access to the wet model
+                inline const WetModel<WetCloud<CloudType> >&
+                    wetModel() const;
+
+                //- Return reference to the wet model
+                inline WetModel<WetCloud<CloudType> >&
+                    wetModel();
+
+
+        // Evolution
+
+            //- Evolve the cloud
+            void evolve();
+
+            //- Particle motion
+            template<class TrackData>
+            void motion(TrackData& td);
+
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "WetCloudI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -63,17 +63,6 @@ Foam::WetModel<CloudType>::~WetModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::label Foam::WetModel<CloudType>::nSubCycles() const
-{
-    notImplemented
-    (
-        "Foam::label Foam::WetModel<CloudType>::nSubCycles() const"
-    );
-    return 0;
-}
-
-
-template<class CloudType>
 bool Foam::WetModel<CloudType>::controlsWallInteraction() const
 {
     notImplemented

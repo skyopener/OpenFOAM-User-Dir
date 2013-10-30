@@ -22,74 +22,131 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::NoWet
+    Foam::Pendular
 
 Description
-    Place holder for 'none' option
 
 SourceFiles
-    NoWet.C
+    Pendular.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoWet_H
-#define NoWet_H
+#ifndef Pendular_H
+#define Pendular_H
 
 #include "WetModel.H"
+#include "InteractionLists.H"
+//#include "WallSiteData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+
+template<class CloudType>
+class PendularModel;
+
+//template<class CloudType>
+//class WallModel;
+
+
 /*---------------------------------------------------------------------------*\
-                        Class NoWet Declaration
+                     Class Pendular Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class NoWet
+class Pendular
 :
     public WetModel<CloudType>
 {
+    // Private data
+
+        //- PendularModel to calculate the interaction between two parcels
+        autoPtr<PendularModel<CloudType> > pendularModel_;
+
+//        //- WallModel to calculate the interaction between the parcel and walls
+//        autoPtr<WallModel<CloudType> > wallModel_;
+
+        //- Interactions lists determining which cells are in
+        //  interaction range of each other
+        InteractionLists<typename CloudType::parcelType> il_;
+
+
+    // Private member functions
+
+        //- Pre collision tasks
+        void preInteraction();
+
+        //- Interactions between parcels
+        void parcelInteraction();
+
+        //- Interactions between real (on-processor) particles
+        void realRealInteraction();
+
+        //- Interactions between real and referred (off processor) particles
+        void realReferredInteraction();
+
+//        //- Interactions with walls
+//        void wallInteraction();
+
+        //- Post collision tasks
+        void postInteraction();
+
+        //- Calculate the pair force between parcels
+        void evaluatePendular
+        (
+            typename CloudType::parcelType& pA,
+            typename CloudType::parcelType& pB
+        ) const;
+
+//        //- Calculate the wall forces on a parcel
+//        void evaluateWall
+//        (
+//            typename CloudType::parcelType& p,
+//            const List<point>& flatSitePoints,
+//            const List<WallSiteData<vector> >& flatSiteData,
+//            const List<point>& sharpSitePoints,
+//            const List<WallSiteData<vector> >& sharpSiteData
+//        ) const;
+
 
 public:
 
     //- Runtime type information
-    TypeName("none");
+    TypeName("pendular");
 
 
     // Constructors
 
         //- Construct from components
-        NoWet(const dictionary& dict, CloudType& owner);
+        Pendular(const dictionary& dict, CloudType& owner);
 
         //- Construct copy
-        NoWet(NoWet<CloudType>& cm);
+        Pendular(Pendular<CloudType>& cm);
 
         //- Construct and return a clone
         virtual autoPtr<WetModel<CloudType> > clone()
         {
             return autoPtr<WetModel<CloudType> >
             (
-                new NoWet<CloudType>(*this)
+                new Pendular<CloudType>(*this)
             );
         }
 
 
     //- Destructor
-    virtual ~NoWet();
+    virtual ~Pendular();
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates wet model
-        virtual bool active() const;
-
-        //- Indicates whether model determines wall bonding or not,
+        //- Indicates whether model determines wall collisions or not,
         //  used to determine what value to use for wallImpactDistance
         virtual bool controlsWallInteraction() const;
 
-        // Bond function
+        // Collision function
         virtual void bond();
 };
 
@@ -101,7 +158,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "NoWet.C"
+#   include "Pendular.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
