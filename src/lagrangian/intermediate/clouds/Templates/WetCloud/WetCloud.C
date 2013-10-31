@@ -43,13 +43,12 @@ void Foam::WetCloud<CloudType>::setModels()
 
 template<class CloudType>
 template<class TrackData>
-void  Foam::WetCloud<CloudType>::moveWet
+void  Foam::WetCloud<CloudType>::moveWetCollide
 (
     TrackData& td,
     const scalar deltaT
 )
 {
-
     td.part() = TrackData::tpVelocityHalfStep;
     CloudType::move(td,  deltaT);
 
@@ -63,13 +62,11 @@ void  Foam::WetCloud<CloudType>::moveWet
 
     this->collision().collide();
 
-    // bond() should come after collide() since the force is initialised in collide()
     this->wetModel().bond();
 
     td.part() = TrackData::tpVelocityHalfStep;
     CloudType::move(td,  deltaT);
 }
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -100,7 +97,7 @@ Foam::WetCloud<CloudType>::WetCloud
                 "const dimensionedVector&, "
                 "bool"
             ")"
-        )   << "Wet modelling not currently available for steady state "
+        )   << "Wet collision modelling not currently available for steady state "
             << "calculations" << exit(FatalError);
     }
 
@@ -113,7 +110,6 @@ Foam::WetCloud<CloudType>::WetCloud
             parcelType::readFields(*this);
         }
     }
-
 }
 
 
@@ -148,12 +144,12 @@ template<class CloudType>
 Foam::WetCloud<CloudType>::~WetCloud()
 {}
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
 void Foam::WetCloud<CloudType>::evolve()
 {
-
     if (this->solution().canEvolve())
     {
         typename parcelType::template
@@ -163,11 +159,11 @@ void Foam::WetCloud<CloudType>::evolve()
     }
 }
 
+
 template<class CloudType>
 template<class TrackData>
 void  Foam::WetCloud<CloudType>::motion(TrackData& td)
 {
-
     // Sympletic leapfrog integration of particle forces:
     // + apply half deltaV with stored force
     // + move positions with new velocity
@@ -178,25 +174,26 @@ void  Foam::WetCloud<CloudType>::motion(TrackData& td)
 
     if (nSubCycles > 1)
     {
-        Info<< "    " << nSubCycles << " move-wet subCycles" << endl;
+        Info<< "    " << nSubCycles << " move-wet-collide subCycles" << endl;
 
-        subCycleTime moveWetSubCycle
+        subCycleTime moveWetCollideSubCycle
         (
             const_cast<Time&>(this->db().time()),
             nSubCycles
         );
 
-        while(!(++moveWetSubCycle).end())
+        while(!(++moveWetCollideSubCycle).end())
         {
-            moveWet(td, this->db().time().deltaTValue());
+            moveWetCollide(td, this->db().time().deltaTValue());
         }
 
-        moveWetSubCycle.endSubCycle();
+        moveWetCollideSubCycle.endSubCycle();
     }
     else
     {
-        moveWet(td, this->db().time().deltaTValue());
+        moveWetCollide(td, this->db().time().deltaTValue());
     }
-
 }
 
+
+// ************************************************************************* //

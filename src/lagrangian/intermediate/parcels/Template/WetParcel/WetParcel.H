@@ -65,6 +65,13 @@ class WetParcel
 :
     public ParcelType
 {
+protected:
+
+    // Protected members
+
+        // Liquid volume deposited on particle surface
+        scalar Vliq_;
+
 public:
 
     // Static data members
@@ -76,10 +83,10 @@ public:
         AddToPropertyList
         (
             ParcelType,
-            " nil"
+            " Vliq"
         );
 
-
+public:
     // Constructors
 
         //- Construct from owner, position, and cloud owner
@@ -109,7 +116,8 @@ public:
             const vector& f0,
             const vector& angularMomentum0,
             const vector& torque0,
-            const typename ParcelType::constantProperties& constProps
+            const typename ParcelType::constantProperties& constProps,
+            const scalar Vliq
         );
 
         //- Construct from Istream
@@ -162,6 +170,17 @@ public:
 
 
     // Member Functions
+
+        // Access
+
+            //- Return const access to the liquid volume
+            inline scalar Vliq() const;
+
+        // Edit
+
+            //- Return access to the liquid volume
+            inline scalar& Vliq();
+
 
         // Tracking
 

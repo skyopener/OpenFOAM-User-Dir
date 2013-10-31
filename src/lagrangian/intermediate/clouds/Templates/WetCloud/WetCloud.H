@@ -103,7 +103,7 @@ protected:
 
                 //- Move-wet particles
                 template<class TrackData>
-                void moveWet(TrackData& td, const scalar deltaT);
+                void moveWetCollide(TrackData& td, const scalar deltaT);
 
 public:
 
@@ -152,7 +152,6 @@ public:
                 //- Return reference to the wet model
                 inline WetModel<WetCloud<CloudType> >&
                     wetModel();
-
 
         // Evolution
 

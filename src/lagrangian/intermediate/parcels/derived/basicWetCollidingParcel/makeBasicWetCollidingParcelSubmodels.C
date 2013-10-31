@@ -42,6 +42,7 @@ License
 
 // Wet
 #include "makeParcelWetModels.H"
+#include "makeWetParcelInjectionModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,6 +66,7 @@ namespace Foam
 
     // Wet sub-models
     makeParcelWetModels(basicWetCollidingCloud);
+    makeWetParcelInjectionModels(basicWetCollidingCloud);
 
 }
 

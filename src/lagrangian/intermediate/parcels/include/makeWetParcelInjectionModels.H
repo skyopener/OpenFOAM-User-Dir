@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,21 +23,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#ifndef makeWetParcelInjectionModels_H
+#define makeWetParcelInjectionModels_H
 
-template<class CloudType>
-inline const Foam::WetModel<Foam::WetCloud<CloudType> >&
-Foam::WetCloud<CloudType>::wetModel() const
-{
-    return wetModel_();
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "ManualInjectionWet.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define makeWetParcelInjectionModels(CloudType)                               \
+                                                                              \
+    makeInjectionModelType(ManualInjectionWet, CloudType);
 
 
-template<class CloudType>
-inline Foam::WetModel<Foam::WetCloud<CloudType> >&
-Foam::WetCloud<CloudType>::wetModel()
-{
-    return wetModel_();
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

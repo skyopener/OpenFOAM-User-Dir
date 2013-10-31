@@ -57,6 +57,9 @@ class Lambert
         //- Contact angle
         scalar contactAngle_;
 
+        //- Fraction of the liquid to form one bridge
+        scalar liqFrac_;
+
 public:
 
     //- Runtime type information

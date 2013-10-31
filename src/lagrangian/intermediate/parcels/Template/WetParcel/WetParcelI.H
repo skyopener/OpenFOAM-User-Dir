@@ -35,7 +35,8 @@ inline Foam::WetParcel<ParcelType>::WetParcel
     const label tetPtI
 )
 :
-    ParcelType(owner, position, cellI, tetFaceI, tetPtI)
+    ParcelType(owner, position, cellI, tetFaceI, tetPtI),
+    Vliq_(0.0)
 {}
 
 
@@ -55,7 +56,8 @@ inline Foam::WetParcel<ParcelType>::WetParcel
     const vector& f0,
     const vector& angularMomentum0,
     const vector& torque0,
-    const typename ParcelType::constantProperties& constProps
+    const typename ParcelType::constantProperties& constProps,
+    const scalar Vliq
 )
 :
     ParcelType
@@ -74,7 +76,22 @@ inline Foam::WetParcel<ParcelType>::WetParcel
         angularMomentum0,
         torque0,
         constProps
-    )
+    ),
+    Vliq_(Vliq)
 {}
 
+// * * * * * * * WetParcel Member Functions  * * * * * * * //
+
+template<class ParcelType>
+inline Foam::scalar Foam::WetParcel<ParcelType>::Vliq() const
+{
+    return Vliq_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar& Foam::WetParcel<ParcelType>::Vliq()
+{
+    return Vliq_;
+}
 // ************************************************************************* //

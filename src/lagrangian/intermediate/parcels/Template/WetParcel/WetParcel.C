@@ -33,7 +33,8 @@ Foam::WetParcel<ParcelType>::WetParcel
     const WetParcel<ParcelType>& p
 )
 :
-    ParcelType(p)
+    ParcelType(p),
+    Vliq_(p.Vliq_)
 {}
 
 
@@ -44,7 +45,8 @@ Foam::WetParcel<ParcelType>::WetParcel
     const polyMesh& mesh
 )
 :
-    ParcelType(p, mesh)
+    ParcelType(p, mesh),
+    Vliq_(p.Vliq_)
 {}
 
 

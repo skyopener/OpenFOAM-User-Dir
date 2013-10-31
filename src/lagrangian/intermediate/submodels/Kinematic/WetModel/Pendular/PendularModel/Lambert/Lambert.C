@@ -36,7 +36,8 @@ Foam::Lambert<CloudType>::Lambert
 :
     PendularModel<CloudType>(dict, cloud, typeName),
     surfaceTension_(readScalar(this->coeffDict().lookup("surfaceTension"))),
-    contactAngle_(readScalar(this->coeffDict().lookup("contactAngle")))
+    contactAngle_(readScalar(this->coeffDict().lookup("contactAngle"))),
+    liqFrac_(readScalar(this->coeffDict().lookup("liquidFraction")))
 {
     contactAngle_ = contactAngle_/180.*mathematical::pi;
 }
@@ -58,46 +59,49 @@ void Foam::Lambert<CloudType>::evaluatePendular
     typename CloudType::parcelType& pB
 ) const
 {
-    scalar Vtot = 1.25e-10; // temporarily
+    scalar Vtot = liqFrac_*(pA.Vliq() + pB.Vliq());
 
-    vector r_AB = (pA.position() - pB.position());
-
-    scalar dAEff = pA.d();
-
-    scalar dBEff = pB.d();
-
-    scalar r_AB_mag = mag(r_AB);
-
-    scalar normalOverlapMag = 0.5*(dAEff + dBEff) - r_AB_mag;
-
-    scalar S = -normalOverlapMag;
-
-    scalar Srup = (1+0.5*contactAngle_)*pow(Vtot, 1./3.);
-
-    if (S < Srup)
+    if(Vtot > 0.0)
     {
-        //Pendular bridge formed
+        vector r_AB = (pA.position() - pB.position());
 
-        vector rHat_AB = r_AB/(r_AB_mag + VSMALL);
+        scalar dAEff = pA.d();
 
-        // Effective radius
-        scalar R = 0.5*dAEff*dBEff/(dAEff + dBEff);
+        scalar dBEff = pB.d();
 
-        // Normal force
-        scalar capMag =
-            4*mathematical::pi
-            *R*surfaceTension_*cos(contactAngle_);
+        scalar r_AB_mag = mag(r_AB);
 
-        if(S > 0)
+        scalar normalOverlapMag = 0.5*(dAEff + dBEff) - r_AB_mag;
+
+        scalar S = -normalOverlapMag;
+
+        scalar Srup = (1+0.5*contactAngle_)*pow(Vtot, 1./3.);
+
+        if (S < Srup)
         {
-            capMag /= 1 + 1 /
-                (sqrt(1+Vtot/(mathematical::pi*R*S*S))-1);
+            //Pendular bridge formed
+
+            vector rHat_AB = r_AB/(r_AB_mag + VSMALL);
+
+            // Effective radius
+            scalar R = 0.5*dAEff*dBEff/(dAEff + dBEff);
+
+            // Normal force
+            scalar capMag =
+                4*mathematical::pi
+                *R*surfaceTension_*cos(contactAngle_);
+
+            if(S > 0)
+            {
+                capMag /= 1 + 1 /
+                    (sqrt(1+Vtot/(mathematical::pi*R*S*S))-1);
+            }
+
+            vector fN_AB = -capMag * rHat_AB;
+
+            pA.f() += fN_AB;
+            pB.f() += -fN_AB;
         }
-
-        vector fN_AB = -capMag * rHat_AB;
-
-        pA.f() += fN_AB;
-        pB.f() += -fN_AB;
     }
 }
 

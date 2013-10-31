@@ -44,16 +44,29 @@ Foam::WetParcel<ParcelType>::WetParcel
     bool readFields
 )
 :
-    ParcelType(mesh, is, readFields)
+    ParcelType(mesh, is, readFields),
+    Vliq_(0.0)
 {
     if (readFields)
     {
+        if (is.format() == IOstream::ASCII)
+        {
+            Vliq_ = readScalar(is);
+        }
+        else
+        {
+            is.read
+            (
+                reinterpret_cast<char*>(&Vliq_),
+                sizeof(Vliq_)
+            );
+        }
     }
 
     // Check state of Istream
     is.check
     (
-        "WetParcel<ParcelType>::Collisions"
+        "WetParcel<ParcelType>::WetParcel"
         "(const polyMesh&, Istream&, bool)"
     );
 }
@@ -69,6 +82,21 @@ void Foam::WetParcel<ParcelType>::readFields(CloudType& c)
     }
 
     ParcelType::readFields(c);
+
+    IOField<scalar> Vliq(c.fieldIOobject("Vliq", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, Vliq);
+
+    label i = 0;
+
+    forAllIter(typename CloudType, c, iter)
+    {
+        WetParcel<ParcelType>& p = iter();
+
+        p.Vliq_ = Vliq[i];
+
+        i++;
+    }
+
 }
 
 
@@ -77,6 +105,24 @@ template<class CloudType>
 void Foam::WetParcel<ParcelType>::writeFields(const CloudType& c)
 {
     ParcelType::writeFields(c);
+
+    label np =  c.size();
+
+    IOField<scalar> Vliq(c.fieldIOobject("Vliq", IOobject::NO_READ), np);
+
+    label i = 0;
+
+    forAllConstIter(typename CloudType, c, iter)
+    {
+        const WetParcel<ParcelType>& p = iter();
+
+        Vliq[i] = p.Vliq();
+
+        i++;
+    }
+
+    Vliq.write();
+
 }
 
 
@@ -91,11 +137,17 @@ Foam::Ostream& Foam::operator<<
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const ParcelType&>(p);
+        os  << static_cast<const ParcelType&>(p)
+            << token::SPACE << p.Vliq();
     }
     else
     {
         os  << static_cast<const ParcelType&>(p);
+        os.write
+        (
+            reinterpret_cast<const char*>(&p.Vliq_),
+            sizeof(p.Vliq())
+        );
     }
 
     // Check state of Ostream
@@ -106,6 +158,43 @@ Foam::Ostream& Foam::operator<<
 
     return os;
 }
+/*
 
+
+
+
+
+
+template<class ParcelType>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const WetParcel<ParcelType>& p
+)
+{
+    if (os.format() == IOstream::ASCII)
+    {
+        os  << static_cast<const ParcelType&>(p)
+            << token::SPACE << p.Vliq();
+    }
+    else
+    {
+        os  << static_cast<const ParcelType&>(p);
+        os.write
+        (
+            reinterpret_cast<const char*>(&p.Vliq_),
+            sizeof(p.Vliq())
+        );
+    }
+
+    // Check state of Ostream
+    os.check
+    (
+        "Ostream& operator<<(Ostream&, const WetParcel<ParcelType>&)"
+    );
+
+    return os;
+}
+*/
 
 // ************************************************************************* //
