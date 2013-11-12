@@ -22,23 +22,24 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::PendularModel
+    Foam::PendularWallModel
 
 Description
-    Templated pendular interaction class
+    Templated wall interaction class
 
 SourceFiles
-    PendularModel.C
-    PendularModelNew.C
+    PendularWallModel.C
+    PendularWallModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PendularModel_H
-#define PendularModel_H
+#ifndef PendularWallModel_H
+#define PendularWallModel_H
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
+#include "WallSiteData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,11 +47,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class PendularModel Declaration
+                          Class PendularWallModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class PendularModel
+class PendularWallModel
 {
     // Private data
 
@@ -64,24 +65,24 @@ class PendularModel
         const dictionary coeffDict_;
 
         //- Surface tension coefficient
-        scalar surfaceTension_;
+        const scalar surfaceTension_;
 
         //- Contact angle
-        scalar contactAngle_;
+        const scalar contactAngle_;
 
         //- Fraction of the liquid to form one bridge
-        scalar liqFrac_;
+        const scalar liqFrac_;
 
 public:
 
     //- Runtime type information
-    TypeName("pendularModel");
+    TypeName("pendularWallModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
     (
         autoPtr,
-        PendularModel,
+        PendularWallModel,
         dictionary,
         (
             const dictionary& dict,
@@ -97,7 +98,7 @@ public:
     // Constructors
 
         //- Construct from components
-        PendularModel
+        PendularWallModel
         (
             const dictionary& dict,
             CloudType& owner,
@@ -108,7 +109,7 @@ public:
         );
 
         //- Construct from components
-        PendularModel
+        PendularWallModel
         (
             const dictionary& dict,
             CloudType& owner,
@@ -118,11 +119,11 @@ public:
         );
 
     //- Destructor
-    virtual ~PendularModel();
+    virtual ~PendularWallModel();
 
 
     //- Selector
-    static autoPtr<PendularModel<CloudType> > New
+    static autoPtr<PendularWallModel<CloudType> > New
     (
         const dictionary& dict,
         CloudType& owner,
@@ -137,18 +138,14 @@ public:
         //- Return the owner cloud object
         const CloudType& owner() const;
 
+        //- Return non-const access to the owner cloud object
+        CloudType& owner();
+
         //- Return the dictionary
         const dictionary& dict() const;
 
         //- Return the coefficients dictionary
         const dictionary& coeffDict() const;
-
-        //- Calculate the pendular interaction between parcels
-        virtual void evaluatePendular
-        (
-            typename CloudType::parcelType& pA,
-            typename CloudType::parcelType& pB
-        ) const = 0;
 
         //- Return the surfaceTension
         const scalar& surfaceTension() const;
@@ -159,6 +156,21 @@ public:
         //- Return the liqFrac
         const scalar& liqFrac() const;
 
+
+    // Member Functions
+
+        //- Return the effective radius for a particle for the model
+        virtual scalar pREff(const typename CloudType::parcelType& p) const = 0;
+
+        //- Calculate the wall interaction for a parcel
+        virtual void evaluatePendularWall
+        (
+            typename CloudType::parcelType& p,
+            const List<point>& flatSitePoints,
+            const List<WallSiteData<vector> >& flatSiteData,
+            const List<point>& sharpSitePoints,
+            const List<WallSiteData<vector> >& sharpSiteData
+        ) const = 0;
 };
 
 
@@ -168,29 +180,29 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makePendularModel(CloudType)                                          \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug(PendularModel<CloudType>, 0);         \
-                                                                              \
-    defineTemplateRunTimeSelectionTable                                       \
-    (                                                                         \
-        PendularModel<CloudType>,                                             \
-        dictionary                                                            \
+#define makePendularWallModel(CloudType)                                          \
+                                                                                  \
+    defineNamedTemplateTypeNameAndDebug(PendularWallModel<CloudType>, 0);         \
+                                                                                  \
+    defineTemplateRunTimeSelectionTable                                           \
+    (                                                                             \
+        PendularWallModel<CloudType>,                                             \
+        dictionary                                                                \
     );
 
 
-#define makePendularModelType(SS, CloudType)                                  \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                    \
-                                                                              \
-    PendularModel<CloudType>::adddictionaryConstructorToTable<SS<CloudType> > \
+#define makePendularWallModelType(SS, CloudType)                                  \
+                                                                                  \
+    defineNamedTemplateTypeNameAndDebug(SS<CloudType>, 0);                        \
+                                                                                  \
+    PendularWallModel<CloudType>::adddictionaryConstructorToTable<SS<CloudType> > \
         add##SS##CloudType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "PendularModel.C"
+#   include "PendularWallModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

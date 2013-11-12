@@ -23,102 +23,47 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PendularModel.H"
+#include "NoPendular.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::PendularModel<CloudType>::PendularModel
+Foam::NoPendular<CloudType>::NoPendular
 (
     const dictionary& dict,
-    CloudType& owner,
-    const word& type,
+    CloudType& cloud,
     const scalar& surfaceTension,
     const scalar& contactAngle,
     const scalar& liqFrac
 )
 :
-    dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs")),
-    surfaceTension_(surfaceTension),
-    contactAngle_(contactAngle),
-    liqFrac_(liqFrac)
+    PendularModel<CloudType>
+    (
+        dict,
+        cloud,
+        surfaceTension,
+        contactAngle,
+        liqFrac
+    )
 {}
 
-template<class CloudType>
-Foam::PendularModel<CloudType>::PendularModel
-(
-    const dictionary& dict,
-    CloudType& owner,
-    const scalar& surfaceTension,
-    const scalar& contactAngle,
-    const scalar& liqFrac
-)
-:
-    dict_(dict),
-    owner_(owner),
-    surfaceTension_(surfaceTension),
-    contactAngle_(contactAngle),
-    liqFrac_(liqFrac)
-{}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::PendularModel<CloudType>::~PendularModel()
+Foam::NoPendular<CloudType>::~NoPendular()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-const CloudType&
-Foam::PendularModel<CloudType>::owner() const
-{
-    return owner_;
-}
+void Foam::NoPendular<CloudType>::evaluatePendular
+(
+    typename CloudType::parcelType& pA,
+    typename CloudType::parcelType& pB
+) const
+{}
 
-
-template<class CloudType>
-const Foam::dictionary& Foam::PendularModel<CloudType>::dict() const
-{
-    return dict_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary&
-Foam::PendularModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
-}
-
-
-template<class CloudType>
-const Foam::scalar&
-Foam::PendularModel<CloudType>::surfaceTension() const
-{
-    return surfaceTension_;
-}
-
-
-template<class CloudType>
-const Foam::scalar&
-Foam::PendularModel<CloudType>::contactAngle() const
-{
-    return contactAngle_;
-}
-
-
-template<class CloudType>
-const Foam::scalar&
-Foam::PendularModel<CloudType>::liqFrac() const
-{
-    return liqFrac_;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "PendularModelNew.C"
 
 // ************************************************************************* //

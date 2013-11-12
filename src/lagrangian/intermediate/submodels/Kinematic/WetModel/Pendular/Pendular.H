@@ -36,7 +36,7 @@ SourceFiles
 
 #include "WetModel.H"
 #include "InteractionLists.H"
-//#include "WallSiteData.H"
+#include "WallSiteData.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,8 +48,8 @@ namespace Foam
 template<class CloudType>
 class PendularModel;
 
-//template<class CloudType>
-//class WallModel;
+template<class CloudType>
+class PendularWallModel;
 
 
 /*---------------------------------------------------------------------------*\
@@ -61,18 +61,29 @@ class Pendular
 :
     public WetModel<CloudType>
 {
+    // Static data
+
+        //- Tolerance to determine flat wall interactions
+        static scalar cosPhiMinFlatWall;
+
+        //- Distance to multiply the distance to a wall with within
+        //  which a duplicate flat wall interaction is defined.  If
+        //  cosPhiFlatWall = 1 - e, this = sqrt(2e - e^2) < sqrt(3e)
+        //  for all e < 1, giving a safe tolerance (i.e. no double
+        //  interactions next to each other.)
+        static scalar flatWallDuplicateExclusion;
+
     // Private data
 
         //- PendularModel to calculate the interaction between two parcels
         autoPtr<PendularModel<CloudType> > pendularModel_;
 
-//        //- WallModel to calculate the interaction between the parcel and walls
-//        autoPtr<WallModel<CloudType> > wallModel_;
+        //- WallModel to calculate the interaction between the parcel and walls
+        autoPtr<PendularWallModel<CloudType> > pendularWallModel_;
 
         //- Interactions lists determining which cells are in
         //  interaction range of each other
         InteractionLists<typename CloudType::parcelType> il_;
-
 
     // Private member functions
 
@@ -88,8 +99,22 @@ class Pendular
         //- Interactions between real and referred (off processor) particles
         void realReferredInteraction();
 
-//        //- Interactions with walls
-//        void wallInteraction();
+        //- Interactions with walls
+        void wallInteraction();
+
+        bool duplicatePointInList
+        (
+            const DynamicList<point>& existingPoints,
+            const point& pointToTest,
+            scalar duplicateRangeSqr
+        ) const;
+
+        bool duplicatePointInList
+        (
+            const DynamicList<point>& existingPoints,
+            const point& pointToTest,
+            const scalarList& duplicateRangeSqr
+        ) const;
 
         //- Post collision tasks
         void postInteraction();
@@ -101,15 +126,15 @@ class Pendular
             typename CloudType::parcelType& pB
         ) const;
 
-//        //- Calculate the wall forces on a parcel
-//        void evaluateWall
-//        (
-//            typename CloudType::parcelType& p,
-//            const List<point>& flatSitePoints,
-//            const List<WallSiteData<vector> >& flatSiteData,
-//            const List<point>& sharpSitePoints,
-//            const List<WallSiteData<vector> >& sharpSiteData
-//        ) const;
+        //- Calculate the wall forces on a parcel
+        void evaluatePendularWall
+        (
+            typename CloudType::parcelType& p,
+            const List<point>& flatSitePoints,
+            const List<WallSiteData<vector> >& flatSiteData,
+            const List<point>& sharpSitePoints,
+            const List<WallSiteData<vector> >& sharpSiteData
+        ) const;
 
 
 public:

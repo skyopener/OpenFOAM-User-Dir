@@ -22,67 +22,42 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Lambert
+    Foam::NoPendularWall
 
 Description
-    Pair forces between particles colliding with a spring, slider, damper model
+    Forces between particles and walls, interacting with a spring,
+    slider, damper model
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Lambert_H
-#define Lambert_H
+#ifndef NoPendularWall_H
+#define NoPendularWall_H
 
-#include "PendularModel.H"
-#include "mathematicalConstants.H"
+#include "PendularWallModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                    Class Lambert Declaration
+                    Class NoPendularWall Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class Lambert
+class NoPendularWall
 :
-    public PendularModel<CloudType>
+    public PendularWallModel<CloudType>
 {
-
-    // Private data
-
-        //- Volume factor for determining the equivalent size of a
-        //  parcel where nParticles is not 1.  The equivalent size of
-        //  the parcel is
-        //      parcelEquivVolume = volumeFactor*nParticles*p.volume()
-        //  so
-        //      parcelEquivD = cbrt(volumeFactor*nParticles)*p.d()
-        //  + When volumeFactor = 1, the particles are compressed
-        //    together so that the equivalent volume of the parcel is
-        //    the sum of the constituent particles
-        //  + When volumeFactor = 3*sqrt(2)/pi, the particles are
-        //    close packed, but uncompressed.
-        //  + When volumeFactor > 3*sqrt(2)/pi, the particles loosely
-        //    grouped.
-        // 3*sqrt(2)/pi = 1.350474 is the volume factor for close
-        // packing, i.e pi/(3*sqrt(2)) is the maximum close packing
-        // factor
-        scalar volumeFactor_;
-
-        //- Switch to control use of equivalent size particles.  Used
-        //  because the calculation can be very expensive.
-        bool useEquivalentSize_;
-
 public:
 
     //- Runtime type information
-    TypeName("Lambert");
+    TypeName("none");
 
 
     // Constructors
 
         //- Construct from dictionary
-        Lambert
+        NoPendularWall
         (
             const dictionary& dict,
             CloudType& cloud,
@@ -93,15 +68,23 @@ public:
 
 
     //- Destructor
-    virtual ~Lambert();
+    virtual ~NoPendularWall();
 
-        //- Calculate the pair interaction between parcels
-        virtual void evaluatePendular
+
+    // Member Functions
+
+        //- Return the effective radius for a particle for the model
+        virtual scalar pREff(const typename CloudType::parcelType& p) const;
+
+        //- Calculate the wall interaction for a parcel
+        virtual void evaluatePendularWall
         (
-            typename CloudType::parcelType& pA,
-            typename CloudType::parcelType& pB
+            typename CloudType::parcelType& p,
+            const List<point>& flatSitePoints,
+            const List<WallSiteData<vector> >& flatSiteData,
+            const List<point>& sharpSitePoints,
+            const List<WallSiteData<vector> >& sharpSiteData
         ) const;
-
 };
 
 
@@ -112,7 +95,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "Lambert.C"
+#   include "NoPendularWall.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

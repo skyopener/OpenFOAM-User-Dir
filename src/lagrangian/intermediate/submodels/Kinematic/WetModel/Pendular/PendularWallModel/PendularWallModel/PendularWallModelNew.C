@@ -23,13 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PendularModel.H"
+#include "PendularWallModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::autoPtr<Foam::PendularModel<CloudType> >
-Foam::PendularModel<CloudType>::New
+Foam::autoPtr<Foam::PendularWallModel<CloudType> >
+Foam::PendularWallModel<CloudType>::New
 (
     const dictionary& dict,
     CloudType& owner,
@@ -38,18 +38,18 @@ Foam::PendularModel<CloudType>::New
     const scalar& liqFrac
 )
 {
-    word PendularModelType(dict.lookup("pendularModel"));
+    word PendularWallModelType(dict.lookup("pendularWallModel"));
 
-    Info<< "Selecting pendular model " << PendularModelType << endl;
+    Info<< "Selecting pendular wall model " << PendularWallModelType << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(PendularModelType);
+        dictionaryConstructorTablePtr_->find(PendularWallModelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
-            "PendularModel<CloudType>::New"
+            "PendularWallModel<CloudType>::New"
             "("
                 "const dictionary&, "
                 "CloudType&, "
@@ -57,14 +57,13 @@ Foam::PendularModel<CloudType>::New
                 "const scalar&, "
                 "const scalar&"
             ")"
-        )   << "Unknown pendular model type "
-            << PendularModelType
+        )   << "Unknown pendular wall model type type " << PendularWallModelType
             << ", constructor not in hash table" << nl << nl
-            << "    Valid pair model types are:" << nl
+            << "    Valid wall model types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
     }
 
-    return autoPtr<PendularModel<CloudType> >(cstrIter()(dict, owner, surfaceTension, contactAngle, liqFrac));
+    return autoPtr<PendularWallModel<CloudType> >(cstrIter()(dict, owner, surfaceTension, contactAngle, liqFrac));
 }
 
 

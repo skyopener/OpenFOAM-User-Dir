@@ -23,102 +23,60 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PendularModel.H"
+#include "NoPendularWall.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::PendularModel<CloudType>::PendularModel
+Foam::NoPendularWall<CloudType>::NoPendularWall
 (
     const dictionary& dict,
-    CloudType& owner,
-    const word& type,
+    CloudType& cloud,
     const scalar& surfaceTension,
     const scalar& contactAngle,
     const scalar& liqFrac
 )
 :
-    dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs")),
-    surfaceTension_(surfaceTension),
-    contactAngle_(contactAngle),
-    liqFrac_(liqFrac)
+    PendularWallModel<CloudType>
+    (
+        dict,
+        cloud,
+        surfaceTension,
+        contactAngle,
+        liqFrac
+    )
 {}
 
-template<class CloudType>
-Foam::PendularModel<CloudType>::PendularModel
-(
-    const dictionary& dict,
-    CloudType& owner,
-    const scalar& surfaceTension,
-    const scalar& contactAngle,
-    const scalar& liqFrac
-)
-:
-    dict_(dict),
-    owner_(owner),
-    surfaceTension_(surfaceTension),
-    contactAngle_(contactAngle),
-    liqFrac_(liqFrac)
-{}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::PendularModel<CloudType>::~PendularModel()
+Foam::NoPendularWall<CloudType>::~NoPendularWall()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-const CloudType&
-Foam::PendularModel<CloudType>::owner() const
+Foam::scalar Foam::NoPendularWall<CloudType>::pREff
+(
+    const typename CloudType::parcelType& p
+) const
 {
-    return owner_;
+    return p.d()/2;
 }
-
 
 template<class CloudType>
-const Foam::dictionary& Foam::PendularModel<CloudType>::dict() const
-{
-    return dict_;
-}
+void Foam::NoPendularWall<CloudType>::evaluatePendularWall
+(
+    typename CloudType::parcelType& p,
+    const List<point>& flatSitePoints,
+    const List<WallSiteData<vector> >& flatSiteData,
+    const List<point>& sharpSitePoints,
+    const List<WallSiteData<vector> >& sharpSiteData
+) const
+{}
 
 
-template<class CloudType>
-const Foam::dictionary&
-Foam::PendularModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
-}
-
-
-template<class CloudType>
-const Foam::scalar&
-Foam::PendularModel<CloudType>::surfaceTension() const
-{
-    return surfaceTension_;
-}
-
-
-template<class CloudType>
-const Foam::scalar&
-Foam::PendularModel<CloudType>::contactAngle() const
-{
-    return contactAngle_;
-}
-
-
-template<class CloudType>
-const Foam::scalar&
-Foam::PendularModel<CloudType>::liqFrac() const
-{
-    return liqFrac_;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "PendularModelNew.C"
 
 // ************************************************************************* //

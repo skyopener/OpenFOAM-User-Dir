@@ -22,33 +22,32 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Lambert
+    Foam::LambertWall
 
 Description
-    Pair forces between particles colliding with a spring, slider, damper model
+    Forces between particles and walls, interacting with a spring,
+    slider, damper model
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Lambert_H
-#define Lambert_H
+#ifndef LambertWall_H
+#define LambertWall_H
 
-#include "PendularModel.H"
-#include "mathematicalConstants.H"
+#include "PendularWallModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                    Class Lambert Declaration
+                    Class LambertWall Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class Lambert
+class LambertWall
 :
-    public PendularModel<CloudType>
+    public PendularWallModel<CloudType>
 {
-
     // Private data
 
         //- Volume factor for determining the equivalent size of a
@@ -73,16 +72,29 @@ class Lambert
         //  because the calculation can be very expensive.
         bool useEquivalentSize_;
 
+
+    // Private Member Functions
+
+        //- Calculate the wall interaction for a parcel at a given site
+        void evaluatePendularWall
+        (
+            typename CloudType::parcelType& p,
+            const point& site,
+            const WallSiteData<vector>& data,
+            scalar pREff
+        ) const;
+
+
 public:
 
     //- Runtime type information
-    TypeName("Lambert");
+    TypeName("LambertWall");
 
 
     // Constructors
 
         //- Construct from dictionary
-        Lambert
+        LambertWall
         (
             const dictionary& dict,
             CloudType& cloud,
@@ -93,15 +105,29 @@ public:
 
 
     //- Destructor
-    virtual ~Lambert();
+    virtual ~LambertWall();
 
-        //- Calculate the pair interaction between parcels
-        virtual void evaluatePendular
+
+    // Member Functions
+
+        //- Return the volumeFactor
+        inline scalar volumeFactor() const
+        {
+            return volumeFactor_;
+        }
+
+        //- Return the effective radius for a particle for the model
+        virtual scalar pREff(const typename CloudType::parcelType& p) const;
+
+        //- Calculate the wall interaction for a parcel
+        virtual void evaluatePendularWall
         (
-            typename CloudType::parcelType& pA,
-            typename CloudType::parcelType& pB
+            typename CloudType::parcelType& p,
+            const List<point>& flatSitePoints,
+            const List<WallSiteData<vector> >& flatSiteData,
+            const List<point>& sharpSitePoints,
+            const List<WallSiteData<vector> >& sharpSiteData
         ) const;
-
 };
 
 
@@ -112,7 +138,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "Lambert.C"
+#   include "LambertWall.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -31,15 +31,27 @@ template<class CloudType>
 Foam::Lambert<CloudType>::Lambert
 (
     const dictionary& dict,
-    CloudType& cloud
+    CloudType& cloud,
+    const scalar& surfaceTension,
+    const scalar& contactAngle,
+    const scalar& liqFrac
 )
 :
-    PendularModel<CloudType>(dict, cloud, typeName),
-    surfaceTension_(readScalar(this->coeffDict().lookup("surfaceTension"))),
-    contactAngle_(readScalar(this->coeffDict().lookup("contactAngle"))),
-    liqFrac_(readScalar(this->coeffDict().lookup("liquidFraction")))
+    PendularModel<CloudType>
+    (
+        dict,
+        cloud,
+        typeName,
+        surfaceTension,
+        contactAngle,
+        liqFrac
+    ),
+    useEquivalentSize_(Switch(this->coeffDict().lookup("useEquivalentSize")))
 {
-    contactAngle_ = contactAngle_/180.*mathematical::pi;
+    if (useEquivalentSize_)
+    {
+        volumeFactor_ = readScalar(this->coeffDict().lookup("volumeFactor"));
+    }
 }
 
 
@@ -59,7 +71,11 @@ void Foam::Lambert<CloudType>::evaluatePendular
     typename CloudType::parcelType& pB
 ) const
 {
-    scalar Vtot = liqFrac_*(pA.Vliq() + pB.Vliq());
+    const scalar& st = this->surfaceTension();
+    const scalar& ca = this->contactAngle();
+    const scalar& lf = this->liqFrac();
+
+    scalar Vtot = lf*(pA.Vliq() + pB.Vliq());
 
     if(Vtot > 0.0)
     {
@@ -75,7 +91,7 @@ void Foam::Lambert<CloudType>::evaluatePendular
 
         scalar S = -normalOverlapMag;
 
-        scalar Srup = (1+0.5*contactAngle_)*pow(Vtot, 1./3.);
+        scalar Srup = (1+0.5*ca)*pow(Vtot, 1./3.);
 
         if (S < Srup)
         {
@@ -89,7 +105,7 @@ void Foam::Lambert<CloudType>::evaluatePendular
             // Normal force
             scalar capMag =
                 4*mathematical::pi
-                *R*surfaceTension_*cos(contactAngle_);
+                *R*st*cos(ca);
 
             if(S > 0)
             {

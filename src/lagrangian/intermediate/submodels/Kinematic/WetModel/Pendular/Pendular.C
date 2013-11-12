@@ -25,7 +25,16 @@ License
 
 #include "Pendular.H"
 #include "PendularModel.H"
-//#include "WallModel.H"
+#include "PendularWallModel.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::scalar Foam::Pendular<CloudType>::cosPhiMinFlatWall = 1 - SMALL;
+
+template<class CloudType>
+Foam::scalar Foam::Pendular<CloudType>::flatWallDuplicateExclusion =
+    sqrt(3*SMALL);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -151,7 +160,6 @@ void Foam::Pendular<CloudType>::realReferredInteraction()
     }
 }
 
-/*
 template<class CloudType>
 void Foam::Pendular<CloudType>::wallInteraction()
 {
@@ -200,253 +208,300 @@ void Foam::Pendular<CloudType>::wallInteraction()
             typename CloudType::parcelType& p =
                 *cellOccupancy[realCellI][cellParticleI];
 
-            const point& pos = p.position();
+            const scalar& lf = pendularWallModel_->liqFrac();
 
-            scalar r = wallModel_->pREff(p);
+            const scalar& ca = pendularWallModel_->contactAngle();
 
-            // real wallFace interactions
+            scalar Vtot = lf*p.Vliq();
 
-            forAll(realWallFaces, realWallFaceI)
+            if(Vtot > VSMALL)
             {
-                label realFaceI = realWallFaces[realWallFaceI];
+                const point& pos = p.position();
 
-                pointHit nearest = mesh.faces()[realFaceI].nearestPoint
-                (
-                    pos,
-                    mesh.points()
-                );
+                scalar Srup = (1+0.5*ca)*pow(Vtot, 1./3.);
 
-                if (nearest.distance() < r)
+                scalar r = pendularWallModel_->pREff(p) + Srup;
+
+                // real wallFace interactions
+
+                forAll(realWallFaces, realWallFaceI)
                 {
-                    vector normal = mesh.faceAreas()[realFaceI];
+                    label realFaceI = realWallFaces[realWallFaceI];
 
-                    normal /= mag(normal);
-
-                    const vector& nearPt = nearest.rawPoint();
-
-                    vector pW = nearPt - pos;
-
-                    scalar normalAlignment = normal & pW/mag(pW);
-
-                    // Find the patchIndex and wallData for WallSiteData object
-                    label patchI = patchID[realFaceI - mesh.nInternalFaces()];
-
-                    label patchFaceI =
-                        realFaceI - mesh.boundaryMesh()[patchI].start();
-
-                    WallSiteData<vector> wSD
+                    pointHit nearest = mesh.faces()[realFaceI].nearestPoint
                     (
-                        patchI,
-                        U.boundaryField()[patchI][patchFaceI]
+                        pos,
+                        mesh.points()
                     );
 
-                    bool particleHit = false;
-                    if (normalAlignment > cosPhiMinFlatWall)
+                    if (nearest.distance() < r)
                     {
-                        // Guard against a flat interaction being
-                        // present on the boundary of two or more
-                        // faces, which would create duplicate contact
-                        // points. Duplicates are discarded.
-                        if
+                        vector normal = mesh.faceAreas()[realFaceI];
+
+                        normal /= mag(normal);
+
+                        const vector& nearPt = nearest.rawPoint();
+
+                        vector pW = nearPt - pos;
+
+                        scalar normalAlignment = normal & pW/mag(pW);
+
+                        // Find the patchIndex and wallData for WallSiteData object
+                        label patchI = patchID[realFaceI - mesh.nInternalFaces()];
+
+                        label patchFaceI =
+                            realFaceI - mesh.boundaryMesh()[patchI].start();
+
+                        WallSiteData<vector> wSD
                         (
-                            !duplicatePointInList
-                            (
-                                flatSitePoints,
-                                nearPt,
-                                sqr(r*flatWallDuplicateExclusion)
-                            )
-                        )
+                            patchI,
+                            U.boundaryField()[patchI][patchFaceI]
+                        );
+
+                        bool particleHit = false;
+                        if (normalAlignment > cosPhiMinFlatWall)
                         {
-                            flatSitePoints.append(nearPt);
-
-                            flatSiteExclusionDistancesSqr.append
+                            // Guard against a flat interaction being
+                            // present on the boundary of two or more
+                            // faces, which would create duplicate contact
+                            // points. Duplicates are discarded.
+                            if
                             (
-                                sqr(r) - sqr(nearest.distance())
-                            );
+                                !duplicatePointInList
+                                (
+                                    flatSitePoints,
+                                    nearPt,
+                                    sqr(r*flatWallDuplicateExclusion)
+                                )
+                            )
+                            {
+                                flatSitePoints.append(nearPt);
 
-                            flatSiteData.append(wSD);
+                                flatSiteExclusionDistancesSqr.append
+                                (
+                                    sqr(r) - sqr(nearest.distance())
+                                );
+
+                                flatSiteData.append(wSD);
+
+                                particleHit = true;
+                            }
+                        }
+                        else
+                        {
+                            otherSitePoints.append(nearPt);
+
+                            otherSiteDistances.append(nearest.distance());
+
+                            otherSiteData.append(wSD);
 
                             particleHit = true;
                         }
-                    }
-                    else
-                    {
-                        otherSitePoints.append(nearPt);
 
-                        otherSiteDistances.append(nearest.distance());
-
-                        otherSiteData.append(wSD);
-
-                        particleHit = true;
-                    }
-
-                    if (particleHit)
-                    {
-                        bool keep = true;
-                        this->owner().functions().postFace(p, realFaceI, keep);
-                        this->owner().functions().postPatch
-                        (
-                            p,
-                            mesh.boundaryMesh()[patchI],
-                            1.0,
-                            p.currentTetIndices(),
-                            keep
-                        );
-                     }
-                }
-            }
-
-            // referred wallFace interactions
-
-            // The labels of referred wall faces in range of this real cell
-            const labelList& cellRefWallFaces = il_.rwfilInverse()[realCellI];
-
-            forAll(cellRefWallFaces, rWFI)
-            {
-                label refWallFaceI = cellRefWallFaces[rWFI];
-
-                const referredWallFace& rwf =
-                    il_.referredWallFaces()[refWallFaceI];
-
-                const pointField& pts = rwf.points();
-
-                pointHit nearest = rwf.nearestPoint(pos, pts);
-
-                if (nearest.distance() < r)
-                {
-                    vector normal = rwf.normal(pts);
-
-                    normal /= mag(normal);
-
-                    const vector& nearPt = nearest.rawPoint();
-
-                    vector pW = nearPt - pos;
-
-                    scalar normalAlignment = normal & pW/mag(pW);
-
-                    // Find the patchIndex and wallData for WallSiteData object
-
-                    WallSiteData<vector> wSD
-                    (
-                        rwf.patchIndex(),
-                        il_.referredWallData()[refWallFaceI]
-                    );
-
-                    bool particleHit = false;
-                    if (normalAlignment > cosPhiMinFlatWall)
-                    {
-                        // Guard against a flat interaction being
-                        // present on the boundary of two or more
-                        // faces, which would create duplicate contact
-                        // points. Duplicates are discarded.
-                        if
-                        (
-                            !duplicatePointInList
-                            (
-                                flatSitePoints,
-                                nearPt,
-                                sqr(r*flatWallDuplicateExclusion)
-                            )
-                        )
+                        if (particleHit)
                         {
-                            flatSitePoints.append(nearPt);
-
-                            flatSiteExclusionDistancesSqr.append
+                            bool keep = true;
+                            this->owner().functions().postFace(p, realFaceI, keep);
+                            this->owner().functions().postPatch
                             (
-                                sqr(r) - sqr(nearest.distance())
+                                p,
+                                mesh.boundaryMesh()[patchI],
+                                1.0,
+                                p.currentTetIndices(),
+                                keep
                             );
+                         }
+                    }
+                }
 
-                            flatSiteData.append(wSD);
+                // referred wallFace interactions
+
+                // The labels of referred wall faces in range of this real cell
+                const labelList& cellRefWallFaces = il_.rwfilInverse()[realCellI];
+
+                forAll(cellRefWallFaces, rWFI)
+                {
+                    label refWallFaceI = cellRefWallFaces[rWFI];
+
+                    const referredWallFace& rwf =
+                        il_.referredWallFaces()[refWallFaceI];
+
+                    const pointField& pts = rwf.points();
+
+                    pointHit nearest = rwf.nearestPoint(pos, pts);
+
+                    if (nearest.distance() < r)
+                    {
+                        vector normal = rwf.normal(pts);
+
+                        normal /= mag(normal);
+
+                        const vector& nearPt = nearest.rawPoint();
+
+                        vector pW = nearPt - pos;
+
+                        scalar normalAlignment = normal & pW/mag(pW);
+
+                        // Find the patchIndex and wallData for WallSiteData object
+
+                        WallSiteData<vector> wSD
+                        (
+                            rwf.patchIndex(),
+                            il_.referredWallData()[refWallFaceI]
+                        );
+
+                        bool particleHit = false;
+                        if (normalAlignment > cosPhiMinFlatWall)
+                        {
+                            // Guard against a flat interaction being
+                            // present on the boundary of two or more
+                            // faces, which would create duplicate contact
+                            // points. Duplicates are discarded.
+                            if
+                            (
+                                !duplicatePointInList
+                                (
+                                    flatSitePoints,
+                                    nearPt,
+                                    sqr(r*flatWallDuplicateExclusion)
+                                )
+                            )
+                            {
+                                flatSitePoints.append(nearPt);
+
+                                flatSiteExclusionDistancesSqr.append
+                                (
+                                    sqr(r) - sqr(nearest.distance())
+                                );
+
+                                flatSiteData.append(wSD);
+
+                                particleHit = false;
+                            }
+                        }
+                        else
+                        {
+                            otherSitePoints.append(nearPt);
+
+                            otherSiteDistances.append(nearest.distance());
+
+                            otherSiteData.append(wSD);
 
                             particleHit = false;
                         }
-                    }
-                    else
-                    {
-                        otherSitePoints.append(nearPt);
 
-                        otherSiteDistances.append(nearest.distance());
-
-                        otherSiteData.append(wSD);
-
-                        particleHit = false;
-                    }
-
-                    if (particleHit)
-                    {
-                        // TODO: call cloud function objects for referred
-                        //       wall particle interactions
+                        if (particleHit)
+                        {
+                            // TODO: call cloud function objects for referred
+                            //       wall particle interactions
+                        }
                     }
                 }
-            }
 
-            // All flat interaction sites found, now classify the
-            // other sites as being in range of a flat interaction, or
-            // a sharp interaction, being aware of not duplicating the
-            // sharp interaction sites.
+                // All flat interaction sites found, now classify the
+                // other sites as being in range of a flat interaction, or
+                // a sharp interaction, being aware of not duplicating the
+                // sharp interaction sites.
 
-            // The "other" sites need to evaluated in order of
-            // ascending distance to their nearest point so that
-            // grouping occurs around the closest in any group
+                // The "other" sites need to evaluated in order of
+                // ascending distance to their nearest point so that
+                // grouping occurs around the closest in any group
 
-            labelList sortedOtherSiteIndices;
+                labelList sortedOtherSiteIndices;
 
-            sortedOrder(otherSiteDistances, sortedOtherSiteIndices);
+                sortedOrder(otherSiteDistances, sortedOtherSiteIndices);
 
-            forAll(sortedOtherSiteIndices, siteI)
-            {
-                label orderedIndex = sortedOtherSiteIndices[siteI];
-
-                const point& otherPt = otherSitePoints[orderedIndex];
-
-                if
-                (
-                    !duplicatePointInList
-                    (
-                        flatSitePoints,
-                        otherPt,
-                        flatSiteExclusionDistancesSqr
-                    )
-                )
+                forAll(sortedOtherSiteIndices, siteI)
                 {
-                    // Not in range of a flat interaction, must be a
-                    // sharp interaction.
+                    label orderedIndex = sortedOtherSiteIndices[siteI];
+
+                    const point& otherPt = otherSitePoints[orderedIndex];
 
                     if
                     (
                         !duplicatePointInList
                         (
-                            sharpSitePoints,
+                            flatSitePoints,
                             otherPt,
-                            sharpSiteExclusionDistancesSqr
+                            flatSiteExclusionDistancesSqr
                         )
                     )
                     {
-                        sharpSitePoints.append(otherPt);
+                        // Not in range of a flat interaction, must be a
+                        // sharp interaction.
 
-                        sharpSiteExclusionDistancesSqr.append
+                        if
                         (
-                            sqr(r) - sqr(otherSiteDistances[orderedIndex])
-                        );
+                            !duplicatePointInList
+                            (
+                                sharpSitePoints,
+                                otherPt,
+                                sharpSiteExclusionDistancesSqr
+                            )
+                        )
+                        {
+                            sharpSitePoints.append(otherPt);
 
-                        sharpSiteData.append(otherSiteData[orderedIndex]);
+                            sharpSiteExclusionDistancesSqr.append
+                            (
+                                sqr(r) - sqr(otherSiteDistances[orderedIndex])
+                            );
+
+                            sharpSiteData.append(otherSiteData[orderedIndex]);
+                        }
                     }
                 }
-            }
 
-            evaluateWall
-            (
-                p,
-                flatSitePoints,
-                flatSiteData,
-                sharpSitePoints,
-                sharpSiteData
-            );
+                evaluatePendularWall
+                (
+                    p,
+                    flatSitePoints,
+                    flatSiteData,
+                    sharpSitePoints,
+                    sharpSiteData
+                );
+            }
         }
     }
 }
-*/
 
+template<class CloudType>
+bool Foam::Pendular<CloudType>::duplicatePointInList
+(
+    const DynamicList<point>& existingPoints,
+    const point& pointToTest,
+    scalar duplicateRangeSqr
+) const
+{
+    forAll(existingPoints, i)
+    {
+        if (magSqr(existingPoints[i] - pointToTest) < duplicateRangeSqr)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+template<class CloudType>
+bool Foam::Pendular<CloudType>::duplicatePointInList
+(
+    const DynamicList<point>& existingPoints,
+    const point& pointToTest,
+    const scalarList& duplicateRangeSqr
+) const
+{
+    forAll(existingPoints, i)
+    {
+        if (magSqr(existingPoints[i] - pointToTest) < duplicateRangeSqr[i])
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 template<class CloudType>
 void Foam::Pendular<CloudType>::postInteraction()
@@ -464,10 +519,8 @@ void Foam::Pendular<CloudType>::evaluatePendular
     pendularModel_->evaluatePendular(pA, pB);
 }
 
-
-/*
 template<class CloudType>
-void Foam::Pendular<CloudType>::evaluateWall
+void Foam::Pendular<CloudType>::evaluatePendularWall
 (
     typename CloudType::parcelType& p,
     const List<point>& flatSitePoints,
@@ -476,7 +529,7 @@ void Foam::Pendular<CloudType>::evaluateWall
     const List<WallSiteData<vector> >& sharpSiteData
 ) const
 {
-    wallModel_->evaluateWall
+    pendularWallModel_->evaluatePendularWall
     (
         p,
         flatSitePoints,
@@ -485,7 +538,6 @@ void Foam::Pendular<CloudType>::evaluateWall
         sharpSiteData
     );
 }
-*/
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -502,19 +554,23 @@ Foam::Pendular<CloudType>::Pendular
         PendularModel<CloudType>::New
         (
             this->coeffDict(),
-            this->owner()
+            this->owner(),
+            readScalar(this->coeffDict().lookup("surfaceTension")),
+            readScalar(this->coeffDict().lookup("contactAngle")),
+            readScalar(this->coeffDict().lookup("liquidFraction"))
         )
     ),
-/*
-    wallModel_
+    pendularWallModel_
     (
-        WallModel<CloudType>::New
+        PendularWallModel<CloudType>::New
         (
             this->coeffDict(),
-            this->owner()
+            this->owner(),
+            readScalar(this->coeffDict().lookup("surfaceTension")),
+            readScalar(this->coeffDict().lookup("contactAngle")),
+            readScalar(this->coeffDict().lookup("liquidFraction"))
         )
     ),
-*/
     il_
     (
         owner.mesh(),
@@ -537,7 +593,7 @@ Foam::Pendular<CloudType>::Pendular(Pendular<CloudType>& cm)
 :
     WetModel<CloudType>(cm),
     pendularModel_(NULL),
-//    wallModel_(NULL),
+    pendularWallModel_(NULL),
     il_(cm.owner().mesh())
 {
     notImplemented
@@ -574,7 +630,7 @@ void Foam::Pendular<CloudType>::bond()
 
     parcelInteraction();
 
-//    wallInteraction();
+    wallInteraction();
 
     postInteraction();
 

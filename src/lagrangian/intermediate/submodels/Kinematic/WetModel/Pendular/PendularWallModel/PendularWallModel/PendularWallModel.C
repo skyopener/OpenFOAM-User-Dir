@@ -23,12 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PendularModel.H"
+#include "PendularWallModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::PendularModel<CloudType>::PendularModel
+Foam::PendularWallModel<CloudType>::PendularWallModel
 (
     const dictionary& dict,
     CloudType& owner,
@@ -44,10 +44,11 @@ Foam::PendularModel<CloudType>::PendularModel
     surfaceTension_(surfaceTension),
     contactAngle_(contactAngle),
     liqFrac_(liqFrac)
+
 {}
 
 template<class CloudType>
-Foam::PendularModel<CloudType>::PendularModel
+Foam::PendularWallModel<CloudType>::PendularWallModel
 (
     const dictionary& dict,
     CloudType& owner,
@@ -61,12 +62,13 @@ Foam::PendularModel<CloudType>::PendularModel
     surfaceTension_(surfaceTension),
     contactAngle_(contactAngle),
     liqFrac_(liqFrac)
+
 {}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::PendularModel<CloudType>::~PendularModel()
+Foam::PendularWallModel<CloudType>::~PendularWallModel()
 {}
 
 
@@ -74,14 +76,22 @@ Foam::PendularModel<CloudType>::~PendularModel()
 
 template<class CloudType>
 const CloudType&
-Foam::PendularModel<CloudType>::owner() const
+Foam::PendularWallModel<CloudType>::owner() const
 {
     return owner_;
 }
 
 
 template<class CloudType>
-const Foam::dictionary& Foam::PendularModel<CloudType>::dict() const
+CloudType&
+Foam::PendularWallModel<CloudType>::owner()
+{
+    return owner_;
+}
+
+
+template<class CloudType>
+const Foam::dictionary& Foam::PendularWallModel<CloudType>::dict() const
 {
     return dict_;
 }
@@ -89,7 +99,7 @@ const Foam::dictionary& Foam::PendularModel<CloudType>::dict() const
 
 template<class CloudType>
 const Foam::dictionary&
-Foam::PendularModel<CloudType>::coeffDict() const
+Foam::PendularWallModel<CloudType>::coeffDict() const
 {
     return coeffDict_;
 }
@@ -97,7 +107,7 @@ Foam::PendularModel<CloudType>::coeffDict() const
 
 template<class CloudType>
 const Foam::scalar&
-Foam::PendularModel<CloudType>::surfaceTension() const
+Foam::PendularWallModel<CloudType>::surfaceTension() const
 {
     return surfaceTension_;
 }
@@ -105,7 +115,7 @@ Foam::PendularModel<CloudType>::surfaceTension() const
 
 template<class CloudType>
 const Foam::scalar&
-Foam::PendularModel<CloudType>::contactAngle() const
+Foam::PendularWallModel<CloudType>::contactAngle() const
 {
     return contactAngle_;
 }
@@ -113,12 +123,13 @@ Foam::PendularModel<CloudType>::contactAngle() const
 
 template<class CloudType>
 const Foam::scalar&
-Foam::PendularModel<CloudType>::liqFrac() const
+Foam::PendularWallModel<CloudType>::liqFrac() const
 {
     return liqFrac_;
 }
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "PendularModelNew.C"
+#include "PendularWallModelNew.C"
 
 // ************************************************************************* //
