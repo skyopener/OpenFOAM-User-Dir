@@ -72,6 +72,12 @@ class PendularModel
         //- Fraction of the liquid to form one bridge
         scalar liqFrac_;
 
+        //- Viscosity
+        scalar viscosity_;
+
+        //- Minimum separation distance divided by effective radius
+        scalar minSep_;
+
 public:
 
     //- Runtime type information
@@ -88,9 +94,19 @@ public:
             CloudType& owner,
             const scalar& surfaceTension,
             const scalar& contactAngle,
-            const scalar& liqFrac
+            const scalar& liqFrac,
+            const scalar& viscosity,
+            const scalar& minSep
         ),
-        (dict, owner, surfaceTension, contactAngle, liqFrac)
+        (
+            dict,
+            owner,
+            surfaceTension,
+            contactAngle,
+            liqFrac,
+            viscosity,
+            minSep
+        )
     );
 
 
@@ -104,7 +120,9 @@ public:
             const word& type,
             const scalar& surfaceTension,
             const scalar& contactAngle,
-            const scalar& liqFrac
+            const scalar& liqFrac,
+            const scalar& viscosity,
+            const scalar& minSep
         );
 
         //- Construct from components
@@ -114,7 +132,9 @@ public:
             CloudType& owner,
             const scalar& surfaceTension,
             const scalar& contactAngle,
-            const scalar& liqFrac
+            const scalar& liqFrac,
+            const scalar& viscosity,
+            const scalar& minSep
         );
 
     //- Destructor
@@ -128,7 +148,9 @@ public:
         CloudType& owner,
         const scalar& surfaceTension,
         const scalar& contactAngle,
-        const scalar& liqFrac
+        const scalar& liqFrac,
+        const scalar& viscosity,
+        const scalar& minSep
     );
 
 
@@ -158,6 +180,12 @@ public:
 
         //- Return the liqFrac
         const scalar& liqFrac() const;
+
+        //- Return the viscosity
+        const scalar& viscosity() const;
+
+        //- Return the minSep
+        const scalar& minSep() const;
 
 };
 

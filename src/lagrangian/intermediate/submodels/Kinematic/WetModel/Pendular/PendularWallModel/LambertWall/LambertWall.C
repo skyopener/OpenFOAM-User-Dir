@@ -39,6 +39,8 @@ void Foam::LambertWall<CloudType>::evaluatePendularWall
     const scalar& st = this->surfaceTension();
     const scalar& ca = this->contactAngle();
     const scalar& lf = this->liqFrac();
+    const scalar& vis = this->viscosity();
+    const scalar& ms = this->minSep();
 
     scalar Vtot = lf*(p.Vliq());
 
@@ -58,9 +60,25 @@ void Foam::LambertWall<CloudType>::evaluatePendularWall
     scalar capMag =
         4*mathematical::pi*pREff*st*cos(ca)/
         (1+max(S, 0)*sqrt(mathematical::pi*pREff/Vtot));
-    vector fN_PW = -capMag*rHat_PW;
+
+    scalar Svis = max(pREff*ms, S);
+
+    scalar etaN = 6*mathematical::pi*vis*pREff*pREff/Svis;
+
+    vector fN_PW = (-capMag - etaN*(U_PW & rHat_PW)) * rHat_PW;
 
     p.f() += fN_PW;
+
+    vector UT_PW = U_PW - (U_PW & rHat_PW)*rHat_PW;
+
+    scalar etaT =
+        6*mathematical::pi*vis*pREff*(8./15.*log(pREff/Svis) + 0.9588);
+
+    vector fT_PW = -etaT * UT_PW;
+
+    p.f() += fT_PW;
+
+    p.torque() += (pREff*-rHat_PW) ^ fT_PW;
 }
 
 
@@ -73,7 +91,9 @@ Foam::LambertWall<CloudType>::LambertWall
     CloudType& cloud,
     const scalar& surfaceTension,
     const scalar& contactAngle,
-    const scalar& liqFrac
+    const scalar& liqFrac,
+    const scalar& viscosity,
+    const scalar& minSep
 )
 :
     PendularWallModel<CloudType>
@@ -83,7 +103,9 @@ Foam::LambertWall<CloudType>::LambertWall
         typeName,
         surfaceTension,
         contactAngle,
-        liqFrac
+        liqFrac,
+        viscosity,
+        minSep
     ),
     useEquivalentSize_(Switch(this->coeffDict().lookup("useEquivalentSize")))
 {

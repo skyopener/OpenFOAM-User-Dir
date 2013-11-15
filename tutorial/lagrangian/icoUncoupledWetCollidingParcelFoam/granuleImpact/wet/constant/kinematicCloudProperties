@@ -121,7 +121,10 @@ subModels
         surfaceTension    0.07;
         contactAngle      0;        // Radian
         liquidFraction    0.0833;   // = 1/12 for mono-size system
-        
+        viscosity         1;
+        minimumSeparation 0.01;    // Normalised by effective particle radius.
+                                   // Only used for viscous force calculation.      
+
         pendularModel    Lambert;
         LambertCoeffs
         {

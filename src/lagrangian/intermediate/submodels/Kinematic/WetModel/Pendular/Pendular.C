@@ -557,7 +557,9 @@ Foam::Pendular<CloudType>::Pendular
             this->owner(),
             readScalar(this->coeffDict().lookup("surfaceTension")),
             readScalar(this->coeffDict().lookup("contactAngle")),
-            readScalar(this->coeffDict().lookup("liquidFraction"))
+            readScalar(this->coeffDict().lookup("liquidFraction")),
+            readScalar(this->coeffDict().lookup("viscosity")),
+            readScalar(this->coeffDict().lookup("minimumSeparation"))
         )
     ),
     pendularWallModel_
@@ -568,7 +570,9 @@ Foam::Pendular<CloudType>::Pendular
             this->owner(),
             readScalar(this->coeffDict().lookup("surfaceTension")),
             readScalar(this->coeffDict().lookup("contactAngle")),
-            readScalar(this->coeffDict().lookup("liquidFraction"))
+            readScalar(this->coeffDict().lookup("liquidFraction")),
+            readScalar(this->coeffDict().lookup("viscosity")),
+            readScalar(this->coeffDict().lookup("minimumSeparation"))
         )
     ),
     il_

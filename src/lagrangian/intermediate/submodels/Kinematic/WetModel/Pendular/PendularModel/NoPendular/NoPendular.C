@@ -34,7 +34,9 @@ Foam::NoPendular<CloudType>::NoPendular
     CloudType& cloud,
     const scalar& surfaceTension,
     const scalar& contactAngle,
-    const scalar& liqFrac
+    const scalar& liqFrac,
+    const scalar& viscosity,
+    const scalar& minSep
 )
 :
     PendularModel<CloudType>
@@ -43,7 +45,9 @@ Foam::NoPendular<CloudType>::NoPendular
         cloud,
         surfaceTension,
         contactAngle,
-        liqFrac
+        liqFrac,
+        viscosity,
+        minSep
     )
 {}
 

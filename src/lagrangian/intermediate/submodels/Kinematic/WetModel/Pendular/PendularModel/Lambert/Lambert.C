@@ -34,7 +34,9 @@ Foam::Lambert<CloudType>::Lambert
     CloudType& cloud,
     const scalar& surfaceTension,
     const scalar& contactAngle,
-    const scalar& liqFrac
+    const scalar& liqFrac,
+    const scalar& viscosity,
+    const scalar& minSep
 )
 :
     PendularModel<CloudType>
@@ -44,7 +46,9 @@ Foam::Lambert<CloudType>::Lambert
         typeName,
         surfaceTension,
         contactAngle,
-        liqFrac
+        liqFrac,
+        viscosity,
+        minSep
     ),
     useEquivalentSize_(Switch(this->coeffDict().lookup("useEquivalentSize")))
 {
@@ -74,10 +78,12 @@ void Foam::Lambert<CloudType>::evaluatePendular
     const scalar& st = this->surfaceTension();
     const scalar& ca = this->contactAngle();
     const scalar& lf = this->liqFrac();
+    const scalar& vis = this->viscosity();
+    const scalar& ms = this->minSep();
 
     scalar Vtot = lf*(pA.Vliq() + pB.Vliq());
 
-    if(Vtot > 0.0)
+    if(Vtot > VSMALL)
     {
         vector r_AB = (pA.position() - pB.position());
 
@@ -113,10 +119,30 @@ void Foam::Lambert<CloudType>::evaluatePendular
                     (sqrt(1+Vtot/(mathematical::pi*R*S*S))-1);
             }
 
-            vector fN_AB = -capMag * rHat_AB;
+            // Relative translational velocity
+            vector U_AB = pA.U() - pB.U();
+
+            scalar Svis = max(R*ms, S);
+
+            scalar etaN = 6*mathematical::pi*vis*R*R/Svis;
+
+            vector fN_AB = (-capMag - etaN*(U_AB & rHat_AB)) * rHat_AB;
 
             pA.f() += fN_AB;
             pB.f() += -fN_AB;
+
+            vector UT_AB = U_AB - (U_AB & rHat_AB)*rHat_AB;
+
+            scalar etaT =
+                6*mathematical::pi*vis*R*(8./15.*log(R/Svis) + 0.9588);
+
+            vector fT_AB = -etaT * UT_AB;
+
+            pA.f() += fT_AB;
+            pB.f() += -fT_AB;
+
+            pA.torque() += (dAEff/2*-rHat_AB) ^ fT_AB;
+            pB.torque() += (dBEff/2*rHat_AB) ^ -fT_AB;
         }
     }
 }

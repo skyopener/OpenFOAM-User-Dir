@@ -35,7 +35,9 @@ Foam::PendularModel<CloudType>::PendularModel
     const word& type,
     const scalar& surfaceTension,
     const scalar& contactAngle,
-    const scalar& liqFrac
+    const scalar& liqFrac,
+    const scalar& viscosity,
+    const scalar& minSep
 )
 :
     dict_(dict),
@@ -43,7 +45,9 @@ Foam::PendularModel<CloudType>::PendularModel
     coeffDict_(dict.subDict(type + "Coeffs")),
     surfaceTension_(surfaceTension),
     contactAngle_(contactAngle),
-    liqFrac_(liqFrac)
+    liqFrac_(liqFrac),
+    viscosity_(viscosity),
+    minSep_(minSep)
 {}
 
 template<class CloudType>
@@ -53,14 +57,18 @@ Foam::PendularModel<CloudType>::PendularModel
     CloudType& owner,
     const scalar& surfaceTension,
     const scalar& contactAngle,
-    const scalar& liqFrac
+    const scalar& liqFrac,
+    const scalar& viscosity,
+    const scalar& minSep
 )
 :
     dict_(dict),
     owner_(owner),
     surfaceTension_(surfaceTension),
     contactAngle_(contactAngle),
-    liqFrac_(liqFrac)
+    liqFrac_(liqFrac),
+    viscosity_(viscosity),
+    minSep_(minSep)
 {}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -117,6 +125,21 @@ Foam::PendularModel<CloudType>::liqFrac() const
 {
     return liqFrac_;
 }
+
+template<class CloudType>
+const Foam::scalar&
+Foam::PendularModel<CloudType>::viscosity() const
+{
+    return viscosity_;
+}
+
+template<class CloudType>
+const Foam::scalar&
+Foam::PendularModel<CloudType>::minSep() const
+{
+    return minSep_;
+}
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "PendularModelNew.C"

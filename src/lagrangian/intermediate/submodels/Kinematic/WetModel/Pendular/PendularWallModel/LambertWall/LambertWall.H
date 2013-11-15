@@ -100,7 +100,9 @@ public:
             CloudType& cloud,
             const scalar& surfaceTension,
             const scalar& contactAngle,
-            const scalar& liqFrac
+            const scalar& liqFrac,
+            const scalar& viscosity,
+            const scalar& minSep
         );
 
 

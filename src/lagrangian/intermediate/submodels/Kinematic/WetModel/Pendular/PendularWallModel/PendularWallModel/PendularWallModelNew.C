@@ -35,7 +35,9 @@ Foam::PendularWallModel<CloudType>::New
     CloudType& owner,
     const scalar& surfaceTension,
     const scalar& contactAngle,
-    const scalar& liqFrac
+    const scalar& liqFrac,
+    const scalar& viscosity,
+    const scalar& minSep
 )
 {
     word PendularWallModelType(dict.lookup("pendularWallModel"));
@@ -55,6 +57,8 @@ Foam::PendularWallModel<CloudType>::New
                 "CloudType&, "
                 "const scalar&, "
                 "const scalar&, "
+                "const scalar&, "
+                "const scalar&, "
                 "const scalar&"
             ")"
         )   << "Unknown pendular wall model type type " << PendularWallModelType
@@ -63,7 +67,19 @@ Foam::PendularWallModel<CloudType>::New
             << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
     }
 
-    return autoPtr<PendularWallModel<CloudType> >(cstrIter()(dict, owner, surfaceTension, contactAngle, liqFrac));
+    return autoPtr<PendularWallModel<CloudType> >
+    (
+        cstrIter()
+        (
+            dict,
+            owner,
+            surfaceTension,
+            contactAngle,
+            liqFrac,
+            viscosity,
+            minSep
+        )
+    );
 }
 
 
