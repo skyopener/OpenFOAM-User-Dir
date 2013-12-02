@@ -1,3 +1,4 @@
+    Info<< "Reading immersedBoundaryProperties\n" << endl;
     IOdictionary immersedBoundaryProperties
     (
         IOobject
@@ -8,6 +9,11 @@
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE
         )
+    );
+
+    dimensionedScalar rhoS
+    (
+        immersedBoundaryProperties.lookup("rhoS")
     );
 
     label nIBLoop

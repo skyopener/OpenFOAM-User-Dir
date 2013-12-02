@@ -60,6 +60,7 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "readTimeControls.H"
     #include "correctPhi.H"
+    #include "KajishimaImmersedBoundary.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
@@ -101,11 +102,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        Info<< "IBLoop = " << nIBLoop << endl;
-        for(label ibI = 0; ibI < nIBLoop; ibI++)
-        {
-            #include "KajishimaImmersedBoundary.H"
-        }
+        #include "KajishimaImmersedBoundary.H"
 
         runTime.write();
 
