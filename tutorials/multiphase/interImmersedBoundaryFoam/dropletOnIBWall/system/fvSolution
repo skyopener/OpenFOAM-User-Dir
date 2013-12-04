@@ -25,6 +25,18 @@ solvers
         relTol          0;
     }
 
+     corrUIB
+    {
+        solver          GAMG;
+        smoother        GaussSeidel;
+        agglomerator    faceAreaPair;
+        nCellsInCoarsestLevel 10;
+        mergeLevels     1;
+        cacheAgglomeration on;
+        tolerance       1e-05;
+        relTol          0;
+    }
+
     p_rgh
     {
         solver          PCG;

@@ -93,6 +93,23 @@
     const dimensionedScalar& rho1 = twoPhaseProperties.rho1();
     const dimensionedScalar& rho2 = twoPhaseProperties.rho2();
 
+    // Combine alpha1 and (1-voidFraction)
+    // Used for curvature calculation
+    // Initialisation does not matter because interfaceFunc
+    // is reset after the alpha1 solution.
+    volScalarField interfaceFunc
+    (
+        IOobject
+        (
+            "interfaceFunc",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        alpha1
+    );
+
     // Need to store rho for ddt(rho, U)
     volScalarField rho
     (
@@ -127,7 +144,14 @@
 
 
     // Construct interface from alpha1 distribution
-    interfaceProperties interface(alpha1, U, twoPhaseProperties);
+    interfaceImmersedBoundaryProperties interface
+    (
+        interfaceFunc,
+        voidFraction,
+        U,
+        twoPhaseProperties,
+        immersedBoundaryProperties
+    );
 
 
     // Construct incompressible turbulence model

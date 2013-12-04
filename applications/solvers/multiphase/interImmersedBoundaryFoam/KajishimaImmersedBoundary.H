@@ -32,6 +32,8 @@
 
     U = voidFraction*U + (scalar(1)-voidFraction)*US;
 
+    U.correctBoundaryConditions();
+
     for(label ibI = 0; ibI < nIBLoop; ibI++)
     {
         phi = fvc::interpolate(voidFraction)*phi
