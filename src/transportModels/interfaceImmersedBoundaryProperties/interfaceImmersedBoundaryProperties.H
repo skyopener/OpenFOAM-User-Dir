@@ -71,16 +71,12 @@ class interfaceImmersedBoundaryProperties
         //- Contact angle for Immersed Boundary
         scalar thetaIB_;
 
-        //- If the interpolated cell face void fraction is smaller than CVoid_,
-        //  the face is regarded as a wall surface and the normal is calculated
-        //  using thetaIB_
-        scalar CVoid_;
-
         //- Stabilisation for normalisation of the interface normal
         const dimensionedScalar deltaN_;
 
         const volScalarField& alpha1_;
         const volScalarField& voidFraction_;
+        const surfaceScalarField& phiVoid_;
         const volVectorField& U_;
         surfaceScalarField nHatf_;
         volScalarField K_;
@@ -125,6 +121,7 @@ public:
         (
             const volScalarField& alpha1,
             const volScalarField& voidFraction,
+            const surfaceScalarField& phiVoid,
             const volVectorField& U,
             const IOdictionary&,
             const IOdictionary&

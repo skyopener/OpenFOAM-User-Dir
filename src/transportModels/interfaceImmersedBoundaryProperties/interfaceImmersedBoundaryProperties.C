@@ -112,7 +112,10 @@ void Foam::interfaceImmersedBoundaryProperties::correctIBContactAngle
 ) const
 {
     // Cell gradient of solid volume fraction
-    const volVectorField gradSolid(-fvc::grad(voidFraction_));
+    const volVectorField gradSolid
+    (
+        -fvc::grad(linearInterpolate(voidFraction_))
+    );
 
     // Interpolated face-gradient of gradSolid
     surfaceVectorField gradSolidf(fvc::interpolate(gradSolid));
@@ -133,15 +136,14 @@ void Foam::interfaceImmersedBoundaryProperties::correctIBContactAngle
         nHatfs*cos(thetaIB_) + tHatfs*sin(thetaIB_)
     );
 
+    // Void fraction at cell faces
+    surfaceScalarField voidFractionf
+    (
+        fvc::interpolate(voidFraction_)
+    );
+
     // Amend nHat at IB wall
-    const surfaceScalarField voidFractionf(fvc::interpolate(voidFraction_));
-    forAll(nHat, faceI)
-    {
-        if(voidFractionf[faceI] <= CVoid_)
-        {
-            nHat[faceI] = nHatfIB[faceI];
-        }
-    }
+    nHat = voidFractionf*nHat + (1-voidFractionf)*nHatfIB;
 }
 
 void Foam::interfaceImmersedBoundaryProperties::calculateK()
@@ -150,8 +152,16 @@ void Foam::interfaceImmersedBoundaryProperties::calculateK()
     const surfaceVectorField& Sf = mesh.Sf();
 
     // Cell gradient of alpha
-    const volVectorField gradAlpha(fvc::grad(alpha1_));
+    volVectorField gradAlpha(fvc::grad(alpha1_));
+/*
+    // Cell gradient of solid volume fraction
+    const volVectorField gradSol
+    (
+        -fvc::grad(linearInterpolate(voidFraction_))
+    );
 
+    gradAlpha = voidFraction_*gradAlpha + (1-voidFraction_)*gradSol;
+*/
     // Interpolated face-gradient of alpha
     surfaceVectorField gradAlphaf(fvc::interpolate(gradAlpha));
 
@@ -187,13 +197,13 @@ void Foam::interfaceImmersedBoundaryProperties::calculateK()
     */
 }
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::interfaceImmersedBoundaryProperties::interfaceImmersedBoundaryProperties
 (
     const volScalarField& alpha1,
     const volScalarField& voidFraction,
+    const surfaceScalarField& phiVoid,
     const volVectorField& U,
     const IOdictionary& dict,
     const IOdictionary& IBDict
@@ -218,14 +228,6 @@ Foam::interfaceImmersedBoundaryProperties::interfaceImmersedBoundaryProperties
         )
     ),
 
-    CVoid_
-    (
-        readScalar
-        (
-            IBDict.lookup("CVoid")
-        )
-    ),
-
     deltaN_
     (
         "deltaN",
@@ -234,6 +236,7 @@ Foam::interfaceImmersedBoundaryProperties::interfaceImmersedBoundaryProperties
 
     alpha1_(alpha1),
     voidFraction_(voidFraction),
+    phiVoid_(phiVoid),
     U_(U),
 
     nHatf_
@@ -261,14 +264,6 @@ Foam::interfaceImmersedBoundaryProperties::interfaceImmersedBoundaryProperties
     )
 {
     thetaIB_ *= Foam::interfaceImmersedBoundaryProperties::convertToRad;
-
-    if (CVoid_ > 1 || CVoid_ < 0)
-    {
-        FatalErrorIn
-        (
-            "interfaceImmersedBoundaryProperties"
-        )   << "CVoid must be between 0 and 1" << exit(FatalError);
-    }
 
     calculateK();
 }

@@ -24,6 +24,14 @@
         )
     );
 
+    scalar CVoid
+    (
+        readScalar
+        (
+            immersedBoundaryProperties.lookup("CVoid")
+        )
+    );
+
     Info<< "Reading field p_rgh\n" << endl;
     volScalarField p_rgh
     (
@@ -50,6 +58,23 @@
             IOobject::AUTO_WRITE
         ),
         mesh
+    );
+
+    volVectorField gradVoid
+    (
+        fvc::grad(linearInterpolate(voidFraction))
+    );
+
+    surfaceVectorField gradVoidf
+    (
+        fvc::interpolate(gradVoid)
+    );
+
+    // phiVoid is used for upwind interpolation of voidFraction
+    surfaceScalarField phiVoid
+    (
+        "phiVoid",
+        gradVoidf & mesh.Sf()
     );
 
     Info<< "Reading field US\n" << endl;
@@ -93,10 +118,10 @@
     const dimensionedScalar& rho1 = twoPhaseProperties.rho1();
     const dimensionedScalar& rho2 = twoPhaseProperties.rho2();
 
-    // Combine alpha1 and (1-voidFraction)
-    // Used for curvature calculation
+    // interfaceFunc is used for curvature calculation
     // Initialisation does not matter because interfaceFunc
     // is reset after the alpha1 solution.
+    Info<< "Creating interfaceFunc\n" << endl;
     volScalarField interfaceFunc
     (
         IOobject
@@ -148,6 +173,7 @@
     (
         interfaceFunc,
         voidFraction,
+        phiVoid,
         U,
         twoPhaseProperties,
         immersedBoundaryProperties

@@ -29,7 +29,3 @@ rho = voidFraction*rho + (1-voidFraction)*rhoS;
 
 rhoPhi = fvc::interpolate(voidFraction)*rhoPhi
        + (1-fvc::interpolate(voidFraction))*rhoS*phiS;
-
-interfaceFunc = max(alpha1, scalar(1)-voidFraction);
-
-interfaceFunc.correctBoundaryConditions();

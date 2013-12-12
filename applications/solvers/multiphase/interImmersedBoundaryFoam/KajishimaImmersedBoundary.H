@@ -34,10 +34,16 @@
 
     U.correctBoundaryConditions();
 
+    surfaceScalarField voidFractionf
+    (
+        fvc::interpolate(voidFraction)
+    );
+
+
     for(label ibI = 0; ibI < nIBLoop; ibI++)
     {
-        phi = fvc::interpolate(voidFraction)*phi
-            + (scalar(1)-fvc::interpolate(voidFraction))*phiS;
+        phi = voidFractionf*phi
+            + (scalar(1)-voidFractionf)*phiS;
 
         Info << "Original Kajishima model\n"
              << "Should not be divergence free\n" << endl;
