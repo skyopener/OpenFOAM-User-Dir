@@ -83,6 +83,9 @@ int main(int argc, char *argv[])
         twoPhaseProperties.correct();
 
         #include "alphaEqnSubCycle.H"
+
+        #include "interfaceFunctionUpdate.H"
+
         interface.correct();
 
         // --- Pressure-velocity PIMPLE corrector loop
