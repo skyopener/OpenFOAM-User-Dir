@@ -1,5 +1,7 @@
 {
-    interfaceFunc = alpha1;
+    interfaceFunc = alpha1/(voidFraction + dimensionedScalar("SMALL", dimless, SMALL));
+
+    interfaceFunc = min(interfaceFunc, dimensionedScalar("1", dimless, 1));
 
     /*
     forAll(phiVoid, faceI)
@@ -40,55 +42,66 @@
         linearInterpolate(voidFraction)
     );
 
-    surfaceScalarField interfaceFuncf
-    (
-        fvc::interpolate(interfaceFunc)
-    );
-
-    surfaceScalarField iff
-    (
-        mesh.magSf()*voidFractionf*interfaceFuncf
-    );
-
-    surfaceScalarField ifb
-    (
-        mesh.magSf()*voidFractionf
-    );
-
-    Field<scalar> ivf(voidFraction.size(), 0);
-    Field<scalar> ivb(voidFraction.size(), 0);
-
-    const labelUList& owner = mesh.owner();
-    const labelUList& neighbour = mesh.neighbour();
-
-    forAll(owner, facei)
+    for(label ic = 0; ic < IBSmoothLoop; ic++)
     {
-        ivf[owner[facei]] += iff[facei];
-        ivb[owner[facei]] += ifb[facei];
-        ivf[neighbour[facei]] += iff[facei];
-        ivb[neighbour[facei]] += ifb[facei];
-    }
+        surfaceScalarField interfaceFuncf
+        (
+            fvc::interpolate(interfaceFunc)
+        );
 
-    forAll(mesh.boundary(), patchi)
-    {
-        const labelUList& pFaceCells =
-            mesh.boundary()[patchi].faceCells();
+        surfaceScalarField iff
+        (
+            mesh.magSf()*voidFractionf*interfaceFuncf
+        );
 
-        const fvsPatchField<scalar>& piff = iff.boundaryField()[patchi];
-        const fvsPatchField<scalar>& pifb = ifb.boundaryField()[patchi];
+        surfaceScalarField ifb
+        (
+            mesh.magSf()*voidFractionf
+        );
 
-        forAll(mesh.boundary()[patchi], facei)
+        Field<scalar> ivf(voidFraction.size(), 0);
+        Field<scalar> ivb(voidFraction.size(), 0);
+
+        const labelUList& owner = mesh.owner();
+        const labelUList& neighbour = mesh.neighbour();
+
+        forAll(owner, facei)
         {
-            ivf[pFaceCells[facei]] += piff[facei];
-            ivb[pFaceCells[facei]] += pifb[facei];
+            ivf[owner[facei]] += iff[facei];
+            ivb[owner[facei]] += ifb[facei];
+            ivf[neighbour[facei]] += iff[facei];
+            ivb[neighbour[facei]] += ifb[facei];
         }
-    }
 
-    forAll(interfaceFunc, celli)
-    {
-        if(voidFraction[celli] <= CVoid)
+        forAll(mesh.boundary(), patchi)
         {
-            interfaceFunc[celli] = ivf[celli]/(ivb[celli]+VSMALL);
+            const labelUList& pFaceCells =
+                mesh.boundary()[patchi].faceCells();
+
+            const fvsPatchField<scalar>& piff = iff.boundaryField()[patchi];
+            const fvsPatchField<scalar>& pifb = ifb.boundaryField()[patchi];
+
+            forAll(mesh.boundary()[patchi], facei)
+            {
+                ivf[pFaceCells[facei]] += piff[facei];
+                ivb[pFaceCells[facei]] += pifb[facei];
+            }
+        }
+
+        forAll(interfaceFunc, celli)
+        {
+            if(voidFraction[celli] <= CVoid)
+            {
+                interfaceFunc[celli] = ivf[celli]/(ivb[celli]+VSMALL);
+    //            if(interfaceFunc[celli] > 1-CVoid)
+    //            {
+    //                interfaceFunc[celli] = 1;
+    //            }
+    //            else
+    //            {
+    //                interfaceFunc[celli] = 0;
+    //            }
+            }
         }
     }
 
