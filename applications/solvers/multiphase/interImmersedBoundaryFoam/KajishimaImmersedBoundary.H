@@ -28,46 +28,62 @@
         corrUIBTypes
     );
 
-    dimensionedScalar rAUf("(1|A(U))", dimTime/rho.dimensions(), 1.0);
+    surfaceScalarField rAUf
+    (
+        "(1|A(U))",
+        fvc::interpolate
+        (
+            (voidFraction+SMALL)
+            *dimensionedScalar("unity", dimTime, 1)/rho
+        )
+    );
+
+    volVectorField Utemp
+    (
+        "Utemp",
+        U
+    );
 
     U = voidFraction*U + (scalar(1)-voidFraction)*US;
 
     U.correctBoundaryConditions();
+
+    fp = rho*(U - Utemp) / runTime.deltaT();
 
     surfaceScalarField voidFractionf
     (
         fvc::interpolate(voidFraction)
     );
 
+    phi = voidFractionf*phi
+        + (scalar(1)-voidFractionf)*phiS;
 
-    for(label ibI = 0; ibI < nIBLoop; ibI++)
+    Info << "Original Kajishima model\n"
+         << "Should not be divergence free\n" << endl;
+
+    #include "continuityErrs.H"
+
+    adjustPhi(phi, U, corrUIB);
+
+    while (pimple.correctNonOrthogonal())
     {
-        phi = voidFractionf*phi
-            + (scalar(1)-voidFractionf)*phiS;
+        fvScalarMatrix corrUIBEqn
+        (
+            fvm::laplacian(rAUf, corrUIB) == fvc::div(phi)
+        );
 
-        Info << "Original Kajishima model\n"
-             << "Should not be divergence free\n" << endl;
+        corrUIBEqn.setReference(pRefCell, pRefValue);
+        corrUIBEqn.solve();
 
-        #include "continuityErrs.H"
-
-        adjustPhi(phi, U, corrUIB);
-
-        while (pimple.correctNonOrthogonal())
+        if (pimple.finalNonOrthogonalIter())
         {
-            fvScalarMatrix corrUIBEqn
-            (
-                fvm::laplacian(rAUf, corrUIB) == fvc::div(phi)
-            );
-
-            corrUIBEqn.setReference(pRefCell, pRefValue);
-            corrUIBEqn.solve();
-
-            if (pimple.finalNonOrthogonalIter())
-            {
-                phi -= corrUIBEqn.flux();
-            }
+            phi -= corrUIBEqn.flux();
+            //U = fvc::reconstruct(phi);
         }
-
-        #include "continuityErrs.H"
     }
+
+    Info << "Flux correction after IB\n"
+         << "Should be divergence free now\n" << endl;
+
+    #include "continuityErrs.H"
 }

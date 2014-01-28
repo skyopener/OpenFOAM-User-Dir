@@ -38,7 +38,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "MULES.H"
+#include "userMULES.H"
 #include "subCycle.H"
 #include "interfaceImmersedBoundaryProperties.H"
 #include "incompressibleTwoPhaseMixture.H"
@@ -60,7 +60,6 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "readTimeControls.H"
     #include "correctPhi.H"
-    #include "KajishimaImmersedBoundary.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 

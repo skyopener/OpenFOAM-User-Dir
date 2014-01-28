@@ -15,16 +15,16 @@
                 phi,
                 alpha1,
                 alphaScheme
-            )
+            )*fvc::interpolate(voidFraction)
           + fvc::flux
             (
                 -fvc::flux(-phir, alpha2, alpharScheme),
                 alpha1,
                 alpharScheme
-            )
+            )*fvc::interpolate(voidFraction)
         );
 
-        MULES::explicitSolve(alpha1, phi, phiAlpha, 1, 0);
+        userMULES::explicitSolve(alpha1, voidFraction, phi, phiAlpha, 1, 0);
 
         alpha2 = 1.0 - alpha1;
         rhoPhi = phiAlpha*(rho1 - rho2) + phi*rho2;

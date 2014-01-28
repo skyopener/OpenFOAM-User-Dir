@@ -16,14 +16,6 @@
         immersedBoundaryProperties.lookup("rhoS")
     );
 
-    label nIBLoop
-    (
-        readLabel
-        (
-            immersedBoundaryProperties.lookup("numberOfIBLoop")
-        )
-    );
-
     scalar CVoid
     (
         readScalar
@@ -244,5 +236,19 @@
         );
         p_rgh = p - rho*gh;
     }
+
+    volVectorField fp
+    (
+        IOobject
+        (
+            "fp",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedVector("zero", dimAcceleration*dimDensity, vector::zero)
+    );
 
     fv::IOoptionList fvOptions(mesh);

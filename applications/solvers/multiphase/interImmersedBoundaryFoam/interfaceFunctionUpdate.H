@@ -93,6 +93,9 @@
             if(voidFraction[celli] <= CVoid)
             {
                 interfaceFunc[celli] = ivf[celli]/(ivb[celli]+VSMALL);
+
+                interfaceFunc[celli] = max(interfaceFunc[celli], 0);
+                interfaceFunc[celli] = min(interfaceFunc[celli], 1);
     //            if(interfaceFunc[celli] > 1-CVoid)
     //            {
     //                interfaceFunc[celli] = 1;
