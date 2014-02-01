@@ -31,10 +31,14 @@
     surfaceScalarField rAUf
     (
         "(1|A(U))",
+        (
+            upwind<scalar>(mesh, phiVoid).interpolate(voidFraction)
+          + SMALL
+        )*
         fvc::interpolate
         (
-            (voidFraction+SMALL)
-            *dimensionedScalar("unity", dimTime, 1)/rho
+
+            dimensionedScalar("unity", dimTime, 1)/rho
         )
     );
 

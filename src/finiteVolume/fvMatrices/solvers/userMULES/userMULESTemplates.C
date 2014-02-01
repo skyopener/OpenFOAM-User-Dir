@@ -36,6 +36,7 @@ License
 #include "syncTools.H"
 
 #include "fvm.H"
+#include "fvc.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -1120,8 +1121,8 @@ void Foam::userMULES::limit
     const fvMesh& mesh = psi.mesh();
 
     surfaceScalarField phiBD(upwind<scalar>(psi.mesh(), phi).flux(psi));
-
     surfaceScalarField& phiCorr = phiPsi;
+
     phiCorr -= phiBD;
 
     scalarField allLambda(mesh.nFaces(), 1.0);

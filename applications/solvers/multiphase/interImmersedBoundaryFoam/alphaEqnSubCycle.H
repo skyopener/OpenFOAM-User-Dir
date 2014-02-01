@@ -23,9 +23,4 @@ else
     #include "alphaEqn.H"
 }
 
-rho == alpha1*rho1 + alpha2*rho2;
-
-rho = voidFraction*rho + (1-voidFraction)*rhoS;
-
-rhoPhi = fvc::interpolate(voidFraction)*rhoPhi
-       + (1-fvc::interpolate(voidFraction))*rhoS*phiS;
+rho == alpha1*rho1 + alpha2*rho2 + (1-voidFraction)*rhoS;
