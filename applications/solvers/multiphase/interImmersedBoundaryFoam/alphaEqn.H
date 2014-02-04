@@ -6,16 +6,30 @@
     phic = min(interface.cAlpha()*phic, max(phic));
     surfaceScalarField phir(phic*interface.nHatf());
 
-    volVectorField UrS
+    volVectorField UrS(fvc::reconstruct(phi));
+    UrS -= US;
+
+    volVectorField gradAlphaS
     (
-        "UrS",
-        U - US
+        -fvc::grad(1-voidFraction)
     );
+
+    surfaceVectorField gradAlphaSf(fvc::interpolate(gradAlphaS));
+
+    dimensionedScalar deltaN
+    (
+        "deltaN",
+        1e-8/pow(average(mesh.V()), 1.0/3.0)
+    );
+
+    surfaceVectorField nHatSf(gradAlphaSf/(mag(gradAlphaSf) + deltaN));
+
+    surfaceScalarField nHatS(nHatSf & mesh.Sf());
 
     surfaceScalarField phirS
     (
         "phirS",
-        fvc::interpolate(UrS) & mesh.Sf()
+        mag(fvc::interpolate(UrS))*nHatS
     );
 
     for (int aCorr=0; aCorr<nAlphaCorr; aCorr++)

@@ -82,7 +82,6 @@
         if (pimple.finalNonOrthogonalIter())
         {
             phi -= corrUIBEqn.flux();
-            //U = fvc::reconstruct(phi);
         }
     }
 
