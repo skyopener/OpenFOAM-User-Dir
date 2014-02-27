@@ -85,6 +85,9 @@
         }
     }
 
+//    U = fvc::reconstruct(phi);
+//    U = (U - (1-voidFraction)*US)/(voidFraction + dimensionedScalar("SM", dimless, 0.0001));
+
     Info << "Flux correction after IB\n"
          << "Should be divergence free now\n" << endl;
 

@@ -152,7 +152,15 @@ void Foam::interfaceImmersedBoundaryProperties::calculateK()
     const surfaceVectorField& Sf = mesh.Sf();
 
     // Cell gradient of alpha
-    volVectorField gradAlpha(fvc::grad(alpha1_));
+    //volVectorField gradAlpha(fvc::grad(alpha1_));
+    const volScalarField& alpha1 = alpha1_;
+    const volScalarField alpha2 = max(voidFraction_ - alpha1, dimensionedScalar("0", dimless, 0));
+
+    surfaceVectorField gradAlphaf
+    (
+        fvc::interpolate(alpha2)*fvc::interpolate(fvc::grad(alpha1))
+      - fvc::interpolate(alpha1)*fvc::interpolate(fvc::grad(alpha2))
+    );
 /*
     // Cell gradient of solid volume fraction
     const volVectorField gradSol
@@ -163,7 +171,7 @@ void Foam::interfaceImmersedBoundaryProperties::calculateK()
     gradAlpha = voidFraction_*gradAlpha + (1-voidFraction_)*gradSol;
 */
     // Interpolated face-gradient of alpha
-    surfaceVectorField gradAlphaf(fvc::interpolate(gradAlpha));
+    //surfaceVectorField gradAlphaf(fvc::interpolate(gradAlpha));
 
     //gradAlphaf -=
     //    (mesh.Sf()/mesh.magSf())

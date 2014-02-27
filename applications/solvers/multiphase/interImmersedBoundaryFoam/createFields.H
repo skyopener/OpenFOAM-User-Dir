@@ -15,7 +15,7 @@
     (
         immersedBoundaryProperties.lookup("rhoS")
     );
-
+/*
     scalar CVoid
     (
         readScalar
@@ -23,7 +23,8 @@
             immersedBoundaryProperties.lookup("CVoid")
         )
     );
-
+*/
+/*
     label IBSmoothLoop
     (
         readLabel
@@ -31,7 +32,7 @@
             immersedBoundaryProperties.lookup("IBSmoothLoop")
         )
     );
-
+*/
     Info<< "Reading field p_rgh\n" << endl;
     volScalarField p_rgh
     (
@@ -118,6 +119,7 @@
     const dimensionedScalar& rho1 = twoPhaseProperties.rho1();
     const dimensionedScalar& rho2 = twoPhaseProperties.rho2();
 
+/*
     // interfaceFunc is used for curvature calculation
     // Initialisation does not matter because interfaceFunc
     // is reset after the alpha1 solution.
@@ -134,6 +136,7 @@
         ),
         alpha1
     );
+*/
 
     // Need to store rho for ddt(rho, U)
     volScalarField rho
@@ -171,7 +174,7 @@
     // Construct interface from alpha1 distribution
     interfaceImmersedBoundaryProperties interface
     (
-        interfaceFunc,
+        alpha1,
         voidFraction,
         phiVoid,
         U,

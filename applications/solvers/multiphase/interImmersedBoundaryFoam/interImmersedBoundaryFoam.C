@@ -38,7 +38,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "userMULES.H"
+#include "MULES.H"
 #include "subCycle.H"
 #include "interfaceImmersedBoundaryProperties.H"
 #include "incompressibleTwoPhaseMixture.H"
@@ -83,7 +83,8 @@ int main(int argc, char *argv[])
 
         #include "alphaEqnSubCycle.H"
 
-        #include "interfaceFunctionUpdate.H"
+        // interfaceFunction is no longer used
+        //#include "interfaceFunctionUpdate.H"
 
         interface.correct();
 
