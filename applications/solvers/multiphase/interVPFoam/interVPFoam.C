@@ -101,7 +101,8 @@ int main(int argc, char *argv[])
             }
         }
 
-        #include "ImmersedBoundary.H"
+        // --- Save particle-fluid interaction force
+        fp = rho * (1.0-voidFraction) * (U-US) / permeability;
 
         runTime.write();
 

@@ -3,6 +3,7 @@
         fvm::ddt(rho, U)
       + fvm::div(rhoPhi, U)
       + turbulence->divDevRhoReff(rho, U)
+      + fvm::Sp(rho*(1.0-voidFraction)/permeability, U)
     );
 
     UEqn.relax();

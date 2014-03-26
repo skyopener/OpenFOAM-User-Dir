@@ -1,3 +1,21 @@
+    Info<< "Reading VPProperties\n" << endl;
+    IOdictionary VPProperties
+    (
+        IOobject
+        (
+            "VPProperties",
+            runTime.constant(),
+            mesh,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE
+        )
+    );
+
+    dimensionedScalar permeability
+    (
+        VPProperties.lookup("permeability")
+    );
+
     Info<< "Reading field p_rgh\n" << endl;
     volScalarField p_rgh
     (
