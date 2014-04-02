@@ -11,9 +11,24 @@
         )
     );
 
+    dimensionedScalar rhoS
+    (
+        VPProperties.lookup("rhoS")
+    );
+
     dimensionedScalar permeability
     (
         VPProperties.lookup("permeability")
+    );
+
+    dimensionedScalar interfacePermeability
+    (
+        VPProperties.lookup("interfacePermeability")
+    );
+
+    dimensionedScalar cVoid
+    (
+        VPProperties.lookup("cVoid")
     );
 
     Info<< "Reading field p_rgh\n" << endl;
@@ -119,9 +134,15 @@
         rho1*phi
     );
 
-
     // Construct interface from alpha1 distribution
-    interfaceProperties interface(alpha1, U, twoPhaseProperties);
+    interfaceVPProperties interface
+    (
+        alpha1,
+        voidFraction,
+        U,
+        twoPhaseProperties,
+        VPProperties
+    );
 
 
     // Construct incompressible turbulence model

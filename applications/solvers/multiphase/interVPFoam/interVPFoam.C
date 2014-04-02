@@ -40,7 +40,7 @@ Description
 #include "fvCFD.H"
 #include "MULES.H"
 #include "subCycle.H"
-#include "interfaceProperties.H"
+#include "interfaceVPProperties.H"
 #include "incompressibleTwoPhaseMixture.H"
 #include "turbulenceModel.H"
 #include "pimpleControl.H"

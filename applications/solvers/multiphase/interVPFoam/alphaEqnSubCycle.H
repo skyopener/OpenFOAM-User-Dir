@@ -23,4 +23,4 @@ else
     #include "alphaEqn.H"
 }
 
-rho == alpha1*rho1 + alpha2*rho2;
+rho == alpha1*rho1 + alpha2*rho2 + (1-voidFraction)*rhoS;

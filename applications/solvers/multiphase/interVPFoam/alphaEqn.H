@@ -6,6 +6,13 @@
     phic = min(interface.cAlpha()*phic, max(phic));
     surfaceScalarField phir(phic*interface.nHatf());
 
+    surfaceScalarField phirS
+    (
+        phi / (fvc::interpolate(voidFraction) + 1.0 - cVoid)
+    );
+
+    volScalarField alphaS("alphaS", 1.0-voidFraction);
+
     for (int aCorr=0; aCorr<nAlphaCorr; aCorr++)
     {
         surfaceScalarField phiAlpha
@@ -22,12 +29,25 @@
                 alpha1,
                 alpharScheme
             )
+        // Interface compression flux at alpha1-alphaS interface
+          + fvc::flux
+            (
+                -fvc::flux(-phirS, alphaS, alpharScheme),
+                alpha1,
+                alpharScheme
+            )
         );
 
-        MULES::explicitSolve(alpha1, phi, phiAlpha, 1, 0);
+        volScalarField aps(alpha1 + alphaS);
 
-        alpha2 = 1.0 - alpha1;
-        rhoPhi = phiAlpha*(rho1 - rho2) + phi*rho2;
+        MULES::explicitSolve(aps, phi, phiAlpha, 1, 0);
+
+        alpha1 = aps - alphaS;
+
+        alpha2 = voidFraction - alpha1;
+        rhoPhi = phiAlpha*(rho1 - rho2)
+               + phi*rho2
+               + fvc::interpolate(alphaS)*phiS*(rhoS - rho2);
     }
 
     Info<< "Phase-1 volume fraction = "
