@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
         }
 
         // --- Save particle-fluid interaction force
-        fp = rho * (1.0-voidFraction) * (U-US) / permeability;
+        fp = rho * (1.0-voidFraction) * (U-US) / perm;
 
         runTime.write();
 

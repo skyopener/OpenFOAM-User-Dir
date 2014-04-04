@@ -26,6 +26,20 @@
         VPProperties.lookup("interfacePermeability")
     );
 
+    volScalarField perm
+    (
+        IOobject
+        (
+            "perm",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        permeability
+    );
+
     dimensionedScalar cVoid
     (
         VPProperties.lookup("cVoid")

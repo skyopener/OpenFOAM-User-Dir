@@ -1,16 +1,4 @@
-    volScalarField perm
-    (
-        IOobject
-        (
-            "perm",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        permeability
-    );
+    perm = permeability;
 
     forAll (perm, celli)
     {
