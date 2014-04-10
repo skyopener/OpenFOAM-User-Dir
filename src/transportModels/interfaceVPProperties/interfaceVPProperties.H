@@ -80,6 +80,8 @@ class interfaceVPProperties
         surfaceScalarField nHatf_;
         volScalarField K_;
 
+        dimensionedScalar cVoid_;
+
 
     // Private Member Functions
 

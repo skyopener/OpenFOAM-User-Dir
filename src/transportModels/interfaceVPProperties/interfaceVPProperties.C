@@ -138,14 +138,39 @@ void Foam::interfaceVPProperties::correctSolidContactAngle
         nHatfs*cos(thetaVP_) + tHatfs*sin(thetaVP_)
     );
 
+    volVectorField gradVoid
+    (
+        fvc::grad(linearInterpolate(voidFraction_))
+    );
+
+    surfaceVectorField gradVoidf
+    (
+        fvc::interpolate(gradVoid)
+    );
+
+    // phiVoid is used for upwind interpolation of voidFraction
+    surfaceScalarField phiVoid
+    (
+        "phiVoid",
+        gradVoidf & alpha1_.mesh().Sf()
+    );
+
+
     // Void fraction at cell faces
     surfaceScalarField voidFractionf
     (
-        fvc::interpolate(voidFraction_)
+        upwind<scalar>(alpha1_.mesh(), phiVoid).interpolate(voidFraction_)
     );
 
     // Amend nHat at solid wall
-    nHat = voidFractionf*nHat + (1-voidFractionf)*nHatfSolid;
+    //nHat = voidFractionf*nHat + (1-voidFractionf)*nHatfSolid;
+    forAll (voidFractionf, facei)
+    {
+        if (voidFractionf[facei] < 1.0 - cVoid_.value())
+        {
+            nHat[facei] = nHatfSolid[facei];
+        }
+    }
 }
 
 
@@ -255,6 +280,11 @@ Foam::interfaceVPProperties::interfaceVPProperties
         ),
         alpha1_.mesh(),
         dimensionedScalar("K", dimless/dimLength, 0.0)
+    ),
+
+    cVoid_
+    (
+        VPDict.lookup("cVoid")
     )
 {
     thetaVP_ *= Foam::interfaceVPProperties::convertToRad;
