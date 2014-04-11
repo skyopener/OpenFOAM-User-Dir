@@ -29,13 +29,13 @@
                 alpha1,
                 alpharScheme
             )
-        // Interface compression flux at alpha1-alphaS interface
-          + fvc::flux
-            (
-                -fvc::flux(-phirS, alphaS, alpharScheme),
-                alpha1,
-                alpharScheme
-            )
+//        // Interface compression flux at alpha1-alphaS interface
+//          + fvc::flux
+//            (
+//                -fvc::flux(-phirS, alphaS, alpharScheme),
+//                alpha1,
+//                alpharScheme
+//            )
         );
 
         volScalarField aps(alpha1 + alphaS);

@@ -20,8 +20,8 @@
         (
             fvc::interpolate(interface.sigmaK())*
             (
-                fvc::interpolate(alpha2)*fvc::snGrad(alpha1)
-              - fvc::interpolate(alpha1)*fvc::snGrad(alpha2)
+                fvc::interpolate(a2)*fvc::snGrad(a1)
+              - fvc::interpolate(a1)*fvc::snGrad(a2)
             )
           - ghf*fvc::snGrad(rho)
         )*rAUf*mesh.magSf()
